@@ -122,7 +122,8 @@ const FormModal = ({
   const [open, setOpen] = useState(false);
 
   const Form = () => {
-    const [state, formAction] = useFormState(deleteActionMap[table], {
+    const deleteAction = deleteActionMap[table];
+    const [state, formAction] = useFormState(deleteAction || deleteSubject, {
       success: false,
       error: false,
     });
@@ -136,6 +137,22 @@ const FormModal = ({
         router.refresh();
       }
     }, [state, router]);
+
+    if (type === "delete" && !deleteAction) {
+      return (
+        <p className="p-4 text-center text-red-500">
+          This delete action is not available yet.
+        </p>
+      );
+    }
+
+    if (type !== "delete" && !forms[table]) {
+      return (
+        <p className="p-4 text-center text-red-500">
+          This management form is not available yet.
+        </p>
+      );
+    }
 
     return type === "delete" && id ? (
       <form action={formAction} className="p-4 flex flex-col gap-4">
