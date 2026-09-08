@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import InputField from "../InputField";
 import { Dispatch, SetStateAction, useEffect } from "react";
 import {
+  studentCreateSchema,
   studentSchema,
   StudentSchema,
 } from "@/lib/formValidationSchemas";
@@ -33,8 +34,9 @@ const StudentForm = ({
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<StudentSchema>({
-    resolver: zodResolver(studentSchema),
+    resolver: zodResolver(type === "create" ? studentCreateSchema : studentSchema),
   });
 
   const [state, formAction] = useFormState(
@@ -134,13 +136,22 @@ const StudentForm = ({
           register={register}
           error={errors.bloodType}
         />
-        <InputField
-          label="Photo URL"
-          name="img"
-          defaultValue={data?.img || ""}
-          register={register}
-          error={errors.img}
-        />
+        <div className="flex flex-col gap-2 w-full md:w-1/4">
+          <label className="text-xs text-gray-500">Photo</label>
+          <input
+            type="file"
+            accept="image/*"
+            className="text-xs ring-[1.5px] ring-gray-300 p-2 rounded-md"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = () => setValue("img", String(reader.result));
+              reader.readAsDataURL(file);
+            }}
+          />
+          <input type="hidden" {...register("img")} defaultValue={data?.img || ""} />
+        </div>
         <InputField
           label="Birthday"
           name="birthday"

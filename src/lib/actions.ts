@@ -175,7 +175,7 @@ export const createTeacher = async (
     return { success: true, error: false };
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true, message: "Could not create teacher. Check that the username, email, phone, and password are unique and valid." };
   }
 };
 
@@ -221,7 +221,7 @@ export const updateTeacher = async (
     return { success: true, error: false };
   } catch (err) {
     console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true, message: "Could not update teacher. Check that the username, email, and phone are unique and valid." };
   }
 };
 

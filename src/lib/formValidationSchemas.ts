@@ -45,6 +45,10 @@ export const teacherSchema = z.object({
   subjects: z.array(z.string()).optional(), // subject ids
 });
 
+export const teacherCreateSchema = teacherSchema.extend({
+  password: z.string().min(8, { message: "Password must be at least 8 characters long!" }),
+});
+
 export type TeacherSchema = z.infer<typeof teacherSchema>;
 
 export const studentSchema = z.object({
@@ -74,6 +78,10 @@ export const studentSchema = z.object({
   gradeId: z.coerce.number().min(1, { message: "Grade is required!" }),
   classId: z.coerce.number().min(1, { message: "Class is required!" }),
   parentId: z.string().min(1, { message: "Parent Id is required!" }),
+});
+
+export const studentCreateSchema = studentSchema.extend({
+  password: z.string().min(8, { message: "Password must be at least 8 characters long!" }),
 });
 
 export type StudentSchema = z.infer<typeof studentSchema>;

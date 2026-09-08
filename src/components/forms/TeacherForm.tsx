@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import InputField from "../InputField";
 import { Dispatch, SetStateAction, useEffect } from "react";
-import { teacherSchema, TeacherSchema } from "@/lib/formValidationSchemas";
+import { teacherCreateSchema, teacherSchema, TeacherSchema } from "@/lib/formValidationSchemas";
 import { useFormState } from "react-dom";
 import { createTeacher, updateTeacher } from "@/lib/actions";
 import { useRouter } from "next/navigation";
@@ -25,8 +25,9 @@ const TeacherForm = ({
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm<TeacherSchema>({
-    resolver: zodResolver(teacherSchema),
+    resolver: zodResolver(type === "create" ? teacherCreateSchema : teacherSchema),
   });
 
   const [state, formAction] = useFormState(
@@ -34,6 +35,7 @@ const TeacherForm = ({
     {
       success: false,
       error: false,
+      message: "",
     }
   );
 
@@ -179,16 +181,25 @@ const TeacherForm = ({
             </p>
           )}
         </div>
-        <InputField
-          label="Photo URL"
-          name="img"
-          defaultValue={data?.img || ""}
-          register={register}
-          error={errors.img}
-        />
+        <div className="flex flex-col gap-2 w-full md:w-1/4">
+          <label className="text-xs text-gray-500">Photo</label>
+          <input
+            type="file"
+            accept="image/*"
+            className="text-xs ring-[1.5px] ring-gray-300 p-2 rounded-md"
+            onChange={(event) => {
+              const file = event.target.files?.[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = () => setValue("img", String(reader.result));
+              reader.readAsDataURL(file);
+            }}
+          />
+          <input type="hidden" {...register("img")} defaultValue={data?.img || ""} />
+        </div>
       </div>
       {state.error && (
-        <span className="text-red-500">Something went wrong!</span>
+        <span className="text-red-500">{state.message || "Something went wrong!"}</span>
       )}
       <button className="bg-blue-400 text-white p-2 rounded-md">
         {type === "create" ? "Create" : "Update"}
