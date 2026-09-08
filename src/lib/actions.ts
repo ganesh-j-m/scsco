@@ -13,6 +13,16 @@ import { clerkClient } from "@clerk/nextjs/server";
 
 type CurrentState = { success: boolean; error: boolean };
 
+const actionError = (err: unknown, fallback: string) => {
+  console.error(err);
+  if (err && typeof err === "object" && "code" in err) {
+    if (err.code === "P2002") return "This record already exists. Use a different unique value.";
+    if (err.code === "P2025") return "The related record was not found.";
+    if (err.code === "P2003") return "A related record is missing or still in use.";
+  }
+  return fallback;
+};
+
 export const createSubject = async (
   currentState: CurrentState,
   data: SubjectSchema
@@ -30,8 +40,7 @@ export const createSubject = async (
     revalidatePath("/list/subjects");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true, message: actionError(err, "Could not create subject.") };
   }
 };
 
@@ -55,8 +64,7 @@ export const updateSubject = async (
     revalidatePath("/list/subjects");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true, message: actionError(err, "Could not update subject.") };
   }
 };
 
@@ -75,8 +83,7 @@ export const deleteSubject = async (
     revalidatePath("/list/subjects");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true, message: actionError(err, "Could not create class.") };
   }
 };
 
@@ -92,8 +99,7 @@ export const createClass = async (
     revalidatePath("/list/classes");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
-    return { success: false, error: true };
+    return { success: false, error: true, message: actionError(err, "Could not update class.") };
   }
 };
 
@@ -174,8 +180,7 @@ export const createTeacher = async (
     revalidatePath("/list/teachers");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
-    return { success: false, error: true, message: "Could not create teacher. Check that the username, email, phone, and password are unique and valid." };
+    return { success: false, error: true, message: actionError(err, "Could not create teacher. Check that the username, email, phone, and password are unique and valid.") };
   }
 };
 
