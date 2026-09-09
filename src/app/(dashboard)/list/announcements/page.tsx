@@ -7,7 +7,7 @@ import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Announcement, Class, Prisma } from "@prisma/client";
 import Image from "next/image";
 import { auth } from "@clerk/nextjs/server";
-
+import { getRoleFromSessionClaims } from "@/lib/role";
 
 type AnnouncementList = Announcement & { class: Class };
 const AnnouncementListPage = async ({
@@ -17,7 +17,7 @@ const AnnouncementListPage = async ({
 }) => {
   
   const { userId, sessionClaims } = auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
+  const role = getRoleFromSessionClaims(sessionClaims);
   const currentUserId = userId;
   
   const columns = [

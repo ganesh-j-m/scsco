@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import {
   ClassSchema,
   ExamSchema,
+  ParentSchema,
   StudentSchema,
   SubjectSchema,
   TeacherSchema,
@@ -11,7 +12,7 @@ import {
 import prisma from "./prisma";
 import { clerkClient } from "@clerk/nextjs/server";
 
-type CurrentState = { success: boolean; error: boolean };
+type CurrentState = { success: boolean; error: boolean; message?: string };
 
 const actionError = (err: unknown, fallback: string) => {
   console.error(err);
@@ -192,9 +193,9 @@ export const updateTeacher = async (
     return { success: false, error: true };
   }
   try {
-    const user = await clerkClient.users.updateUser(data.id, {
+    await clerkClient.users.updateUser(data.id, {
       username: data.username,
-      ...(data.password !== "" && { password: data.password }),
+      ...(data.password && data.password !== "" && { password: data.password }),
       firstName: data.name,
       lastName: data.surname,
     });
@@ -204,7 +205,6 @@ export const updateTeacher = async (
         id: data.id,
       },
       data: {
-        ...(data.password !== "" && { password: data.password }),
         username: data.username,
         name: data.name,
         surname: data.surname,
@@ -227,6 +227,88 @@ export const updateTeacher = async (
   } catch (err) {
     console.log(err);
     return { success: false, error: true, message: "Could not update teacher. Check that the username, email, and phone are unique and valid." };
+  }
+};
+
+export const createParent = async (
+  currentState: CurrentState,
+  data: ParentSchema
+) => {
+  try {
+    const user = await clerkClient.users.createUser({
+      username: data.username,
+      password: data.password,
+      firstName: data.name,
+      lastName: data.surname,
+      publicMetadata: { role: "parent" },
+    });
+
+    await prisma.parent.create({
+      data: {
+        id: user.id,
+        username: data.username,
+        name: data.name,
+        surname: data.surname,
+        email: data.email || null,
+        phone: data.phone,
+        address: data.address,
+      },
+    });
+
+    revalidatePath("/list/parents");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true, message: actionError(err, "Could not create parent. Check that the username, email, phone, and password are unique and valid.") };
+  }
+};
+
+export const updateParent = async (
+  currentState: CurrentState,
+  data: ParentSchema
+) => {
+  if (!data.id) {
+    return { success: false, error: true };
+  }
+
+  try {
+    await clerkClient.users.updateUser(data.id, {
+      username: data.username,
+      ...(data.password && data.password !== "" && { password: data.password }),
+      firstName: data.name,
+      lastName: data.surname,
+    });
+
+    await prisma.parent.update({
+      where: { id: data.id },
+      data: {
+        username: data.username,
+        name: data.name,
+        surname: data.surname,
+        email: data.email || null,
+        phone: data.phone,
+        address: data.address,
+      },
+    });
+
+    revalidatePath("/list/parents");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true, message: actionError(err, "Could not update parent. Check that the username, email, and phone are unique and valid.") };
+  }
+};
+
+export const deleteParent = async (
+  currentState: CurrentState,
+  data: FormData
+) => {
+  const id = data.get("id") as string;
+  try {
+    await clerkClient.users.deleteUser(id);
+    await prisma.parent.delete({ where: { id } });
+    revalidatePath("/list/parents");
+    return { success: true, error: false };
+  } catch (err) {
+    return { success: false, error: true, message: actionError(err, "Could not delete parent.") };
   }
 };
 
@@ -322,7 +404,6 @@ export const updateStudent = async (
         id: data.id,
       },
       data: {
-        ...(data.password !== "" && { password: data.password }),
         username: data.username,
         name: data.name,
         surname: data.surname,

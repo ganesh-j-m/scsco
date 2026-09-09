@@ -9,17 +9,11 @@ const matchers = Object.keys(routeAccessMap).map((route) => ({
 
 console.log(matchers);
 
+import { getRoleFromSessionClaims } from "./lib/role";
+
 export default clerkMiddleware((auth, req) => {
   const { sessionClaims, userId } = auth();
-
-  const claims = sessionClaims as
-    | {
-        metadata?: { role?: string };
-        public_metadata?: { role?: string };
-      }
-    | null
-    | undefined;
-  const role = claims?.public_metadata?.role ?? claims?.metadata?.role;
+  const role = getRoleFromSessionClaims(sessionClaims);
 
   for (const { matcher, allowedRoles } of matchers) {
     if (matcher(req)) {

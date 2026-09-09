@@ -3,6 +3,7 @@ import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import prisma from "@/lib/prisma";
+import { getRoleFromSessionClaims } from "@/lib/role";
 import { ITEM_PER_PAGE } from "@/lib/settings";
 import { Class, Lesson, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
@@ -20,7 +21,7 @@ const LessonListPage = async ({
 }) => {
 
 const { sessionClaims } = auth();
-const role = (sessionClaims?.metadata as { role?: string })?.role;
+const role = getRoleFromSessionClaims(sessionClaims);
 
 
 const columns = [
