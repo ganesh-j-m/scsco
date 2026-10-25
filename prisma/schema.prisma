@@ -1,0 +1,801 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ───────────── Enums ─────────────
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  PRINCIPAL
+  HOD
+  FACULTY
+  STUDENT
+  PARENT
+  ALUMNI
+}
+
+enum RecordStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum PublishStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum ApprovalStatus {
+  PENDING
+  IN_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum FeeStatus {
+  PENDING
+  PARTIAL
+  PAID
+  OVERDUE
+}
+
+enum GrievanceStatus {
+  OPEN
+  IN_REVIEW
+  RESOLVED
+  REJECTED
+}
+
+enum FormStatus {
+  DRAFT
+  PUBLISHED
+  CLOSED
+  ARCHIVED
+}
+
+enum FormTargetType {
+  ALL_STUDENTS
+  DEPARTMENT
+  COURSE
+  YEAR
+  DIVISION
+  CLASS
+  FACULTY
+  HOD
+  TEACHERS
+  PARENTS
+  STAFF
+  SELECTED_USERS
+}
+
+enum Weekday {
+  MON
+  TUE
+  WED
+  THU
+  FRI
+  SAT
+  SUN
+}
+
+enum NotificationType {
+  NOTICE
+  ACADEMIC
+  FORM
+  SYSTEM
+  ALERT
+}
+
+// ───────────── Identity ─────────────
+model User {
+  id           String       @id @default(cuid())
+  loginId      String       @unique
+  name         String
+  email        String       @unique
+  phone        String?
+  role         Role
+  passwordHash String
+  status       RecordStatus @default(ACTIVE)
+  lastLoginAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  student       Student?
+  faculty       Faculty?
+  parent        Parent?
+  notifications Notification[]
+  auditLogs     AuditLog[]
+  forms         Form[]
+  submissions   FormSubmission[]
+  grievances    Grievance[]
+
+  @@index([role])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Department {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  code        String       @unique
+  description String?
+  hodId       String?      @unique
+  status      RecordStatus @default(ACTIVE)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  hod      Faculty?  @relation("DepartmentHod", fields: [hodId], references: [id], onDelete: SetNull)
+  courses  Course[]
+  faculty  Faculty[] @relation("FacultyDepartment")
+  students Student[]
+}
+
+model Course {
+  id           String       @id @default(cuid())
+  name         String
+  code         String       @unique
+  departmentId String
+  durationYears Int         @default(3)
+  description  String?
+  status       RecordStatus @default(ACTIVE)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  department Department @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  subjects   Subject[]
+  students   Student[]
+  exams      Exam[]
+
+  @@index([departmentId])
+}
+
+model Subject {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  courseId  String
+  semester  Int
+  credits   Int      @default(4)
+  facultyId String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course     Course              @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  faculty    Faculty?            @relation(fields: [facultyId], references: [id], onDelete: SetNull)
+  timetable  Timetable[]
+  attendance Attendance[]
+  sessions   AttendanceSession[]
+  exams      Exam[]
+  results    Result[]
+  courseWork CourseWork[]
+
+  @@index([courseId, semester])
+  @@index([facultyId])
+}
+
+model Student {
+  id            String       @id @default(cuid())
+  userId        String       @unique
+  studentId     String       @unique
+  prn           String?      @unique
+  dateOfBirth   DateTime?
+  gender        String?
+  departmentId  String
+  courseId      String
+  year          Int
+  semester      Int
+  division      String
+  admissionYear Int
+  address       String?
+  photoUrl      String?
+  parentId      String?
+  status        RecordStatus @default(ACTIVE)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department Department   @relation(fields: [departmentId], references: [id], onDelete: Restrict)
+  course     Course       @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  parent     Parent?      @relation(fields: [parentId], references: [id], onDelete: SetNull)
+  attendance Attendance[]
+  results    Result[]
+  fees       Fee[]
+  certificates Certificate[]
+  bookIssues BookIssue[]
+  workSubmissions CourseWorkSubmission[]
+
+  @@index([departmentId, courseId, year, division])
+  @@index([parentId])
+}
+
+model Faculty {
+  id           String       @id @default(cuid())
+  userId       String       @unique
+  employeeId   String       @unique
+  departmentId String
+  designation  String?
+  qualification String?
+  photoUrl     String?
+  status       RecordStatus @default(ACTIVE)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  department   Department  @relation("FacultyDepartment", fields: [departmentId], references: [id], onDelete: Restrict)
+  headOf       Department? @relation("DepartmentHod")
+  subjects     Subject[]
+  timetable    Timetable[]
+  attendance   Attendance[]
+  sessions     AttendanceSession[]
+
+  @@index([departmentId])
+}
+
+model Parent {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  occupation String?
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  children Student[]
+}
+
+// ───────────── Academics ─────────────
+model Timetable {
+  id           String   @id @default(cuid())
+  day          Weekday
+  startTime    String
+  endTime      String
+  departmentId String
+  courseId     String
+  year         Int
+  division     String
+  subjectId    String
+  facultyId    String
+  room         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  faculty Faculty @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+
+  @@index([courseId, year, division, day])
+  @@index([facultyId, day])
+}
+
+model AttendanceSession {
+  id         String   @id @default(cuid())
+  sessionId  String   @unique
+  facultyId  String
+  subjectId  String
+  departmentId String
+  courseId   String
+  year       Int
+  division   String
+  date       DateTime @db.Date
+  startsAt   DateTime
+  expiresAt  DateTime
+  closedAt   DateTime?
+  // set once students who did not scan have been recorded as ABSENT
+  finalizedAt DateTime?
+  createdAt  DateTime @default(now())
+
+  faculty    Faculty      @relation(fields: [facultyId], references: [id], onDelete: Restrict)
+  subject    Subject      @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+  attendance Attendance[]
+
+  @@index([facultyId, date])
+  @@index([expiresAt])
+  @@index([finalizedAt, expiresAt])
+}
+
+model Attendance {
+  id        String           @id @default(cuid())
+  studentId String
+  subjectId String
+  facultyId String
+  sessionId String?
+  date      DateTime         @db.Date
+  time      DateTime         @default(now())
+  status    AttendanceStatus @default(PRESENT)
+  courseId  String
+  year      Int
+  division  String
+  createdAt DateTime         @default(now())
+
+  student Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject Subject            @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+  faculty Faculty            @relation(fields: [facultyId], references: [id], onDelete: Restrict)
+  session AttendanceSession? @relation(fields: [sessionId], references: [id], onDelete: SetNull)
+
+  // blocks duplicate QR scans for the same session
+  @@unique([sessionId, studentId])
+  @@index([studentId])
+  @@index([date])
+  @@index([subjectId])
+  @@index([studentId, subjectId, date])
+}
+
+model Exam {
+  id           String   @id @default(cuid())
+  name         String
+  courseId     String
+  subjectId    String
+  semester     Int
+  date         DateTime
+  startTime    String
+  endTime      String
+  room         String?
+  instructions String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Restrict)
+  subject Subject  @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+  results Result[]
+
+  @@index([courseId, semester])
+  @@index([date])
+}
+
+model Result {
+  id           String   @id @default(cuid())
+  studentId    String
+  examId       String
+  subjectId    String
+  marks        Float
+  maxMarks     Float    @default(100)
+  grade        String?
+  passed       Boolean  @default(true)
+  semester     Int
+  academicYear String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  exam    Exam    @relation(fields: [examId], references: [id], onDelete: Cascade)
+  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+
+  @@unique([studentId, examId])
+  @@index([studentId, academicYear])
+}
+
+// ───────────── Administration ─────────────
+model Fee {
+  id        String    @id @default(cuid())
+  studentId String
+  title     String
+  amount    Decimal   @db.Decimal(10, 2)
+  paid      Decimal   @default(0) @db.Decimal(10, 2)
+  dueDate   DateTime
+  status    FeeStatus @default(PENDING)
+  receiptNo String?   @unique
+  paidAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([status])
+}
+
+model Certificate {
+  id          String         @id @default(cuid())
+  studentId   String
+  type        String
+  reason      String?
+  status      ApprovalStatus @default(PENDING)
+  remarks     String?
+  issuedAt    DateTime?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([status])
+}
+
+model Admission {
+  id            String         @id @default(cuid())
+  applicantName String
+  email         String
+  phone         String
+  courseId      String?
+  previousMarks Float?
+  address       String?
+  status        ApprovalStatus @default(PENDING)
+  remarks       String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([status])
+  @@index([email])
+}
+
+model Grievance {
+  id         String          @id @default(cuid())
+  userId     String
+  category   String
+  subject    String
+  description String
+  attachmentUrl String?
+  status     GrievanceStatus @default(OPEN)
+  response   String?
+  resolvedAt DateTime?
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+}
+
+// ───────────── Campus ─────────────
+model Placement {
+  id          String        @id @default(cuid())
+  company     String
+  jobTitle    String
+  eligibility String?
+  package     String?
+  location    String?
+  driveDate   DateTime?
+  deadline    DateTime?
+  description String?
+  status      PublishStatus @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status])
+  @@index([driveDate])
+}
+
+model LibraryBook {
+  id          String   @id @default(cuid())
+  title       String
+  author      String
+  category    String
+  isbn        String   @unique
+  totalCopies Int      @default(1)
+  available   Int      @default(1)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  issues BookIssue[]
+
+  @@index([category])
+  @@index([title])
+}
+
+model BookIssue {
+  id         String    @id @default(cuid())
+  bookId     String
+  studentId  String
+  issuedAt   DateTime  @default(now())
+  dueDate    DateTime
+  returnedAt DateTime?
+  fine       Decimal   @default(0) @db.Decimal(8, 2)
+
+  book    LibraryBook @relation(fields: [bookId], references: [id], onDelete: Restrict)
+  student Student     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([bookId])
+  @@index([returnedAt])
+}
+
+model Facility {
+  id          String        @id @default(cuid())
+  name        String
+  description String?
+  imageUrl    String?
+  status      PublishStatus @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status])
+}
+
+model Achievement {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  imageUrl    String?
+  date        DateTime?
+  status      PublishStatus @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status])
+}
+
+// ───────────── Website CMS ─────────────
+model Notice {
+  id          String        @id @default(cuid())
+  title       String
+  body        String
+  attachmentUrl String?
+  status      PublishStatus @default(DRAFT)
+  publishedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([status, publishedAt])
+}
+
+model Event {
+  id          String        @id @default(cuid())
+  title       String
+  description String?
+  venue       String?
+  imageUrl    String?
+  date        DateTime
+  status      PublishStatus @default(DRAFT)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([date])
+  @@index([status])
+}
+
+model GalleryItem {
+  id        String        @id @default(cuid())
+  title     String
+  imageUrl  String
+  category  String?
+  status    PublishStatus @default(DRAFT)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([status])
+}
+
+// Key/value CMS blocks: homepage hero, principal profile, contact, admissions info, campus content
+model SiteContent {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType @default(SYSTEM)
+  title     String
+  body      String?
+  link      String?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  entity     String?
+  entityId   String?
+  metadata   Json?
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity, entityId])
+  @@index([createdAt])
+}
+
+// ───────────── Form Builder ─────────────
+model Form {
+  id                       String     @id @default(cuid())
+  title                    String
+  description              String?
+  instructions             String?
+  createdById              String
+  status                   FormStatus @default(DRAFT)
+  startAt                  DateTime?
+  endAt                    DateTime?
+  submissionLimit          Int?
+  allowMultipleSubmissions Boolean    @default(false)
+  allowEditAfterSubmission Boolean    @default(false)
+  requireLogin             Boolean    @default(true)
+  // department scope of the creator (HOD/Faculty) used for permission checks
+  scopeDepartmentId        String?
+  createdAt                DateTime   @default(now())
+  updatedAt                DateTime   @updatedAt
+
+  createdBy   User             @relation(fields: [createdById], references: [id], onDelete: Restrict)
+  sections    FormSection[]
+  fields      FormField[]
+  assignments FormAssignment[]
+  submissions FormSubmission[]
+  files       FormFile[]
+
+  @@index([createdById])
+  @@index([status])
+  @@index([scopeDepartmentId])
+}
+
+model FormSection {
+  id        String   @id @default(cuid())
+  formId    String
+  title     String
+  order     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  form   Form        @relation(fields: [formId], references: [id], onDelete: Cascade)
+  fields FormField[]
+
+  @@index([formId, order])
+}
+
+model FormField {
+  id               String   @id @default(cuid())
+  formId           String
+  sectionId        String?
+  type             String
+  label            String
+  description      String?
+  placeholder      String?
+  helpText         String?
+  defaultValue     String?
+  required         Boolean  @default(false)
+  order            Int
+  validationConfig Json?
+  // { fieldId, operator: "equals"|"notEquals", value } — validated server-side
+  conditionalLogic Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  form    Form          @relation(fields: [formId], references: [id], onDelete: Cascade)
+  section FormSection?  @relation(fields: [sectionId], references: [id], onDelete: SetNull)
+  options FormOption[]
+  answers FormAnswer[]
+
+  @@index([formId, order])
+}
+
+model FormOption {
+  id      String @id @default(cuid())
+  fieldId String
+  label   String
+  value   String
+  order   Int
+
+  field FormField @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+
+  @@index([fieldId, order])
+}
+
+model FormAssignment {
+  id         String         @id @default(cuid())
+  formId     String
+  targetType FormTargetType
+  targetId   String?
+
+  form Form @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  @@unique([formId, targetType, targetId])
+  @@index([formId])
+}
+
+model FormSubmission {
+  id          String   @id @default(cuid())
+  formId      String
+  userId      String
+  // attempt number: 1 for single-submission forms; enforced unique per user
+  attempt     Int      @default(1)
+  status      String   @default("SUBMITTED")
+  submittedAt DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  form    Form         @relation(fields: [formId], references: [id], onDelete: Cascade)
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers FormAnswer[]
+
+  @@unique([formId, userId, attempt])
+  @@index([formId])
+  @@index([userId])
+}
+
+model FormAnswer {
+  id           String @id @default(cuid())
+  submissionId String
+  fieldId      String
+  value        Json
+
+  submission FormSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  field      FormField      @relation(fields: [fieldId], references: [id], onDelete: Cascade)
+
+  @@unique([submissionId, fieldId])
+  @@index([fieldId])
+}
+
+// ───────── Phase 11b: assignments, study material, private files ─────────
+// kind: "ASSIGNMENT" (students can submit a file) or "MATERIAL" (download only).
+// division null = every division of that year. Files live in the private upload folder, never in /uploads.
+model CourseWork {
+  id          String        @id @default(cuid())
+  kind        String
+  title       String
+  description String?
+  subjectId   String
+  year        Int
+  division    String?
+  dueDate     DateTime?
+  maxMarks    Int?
+  status      PublishStatus @default(DRAFT)
+  fileKey     String?
+  fileName    String?
+  fileMime    String?
+  fileSize    Int?
+  createdById String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  subject     Subject                @relation(fields: [subjectId], references: [id], onDelete: Restrict)
+  submissions CourseWorkSubmission[]
+
+  @@index([subjectId, kind, status])
+  @@index([createdById])
+}
+
+model CourseWorkSubmission {
+  id           String   @id @default(cuid())
+  courseWorkId String
+  studentId    String
+  note         String?
+  fileKey      String
+  fileName     String
+  fileMime     String
+  fileSize     Int
+  marks        Int?
+  feedback     String?
+  submittedAt  DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  courseWork CourseWork @relation(fields: [courseWorkId], references: [id], onDelete: Cascade)
+  student    Student    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([courseWorkId, studentId])
+  @@index([studentId])
+}
+
+// A file a person attached to a "File upload" question. Stored privately; only the uploader and the form's managers can open it.
+model FormFile {
+  id        String   @id @default(cuid())
+  formId    String
+  userId    String
+  fileKey   String
+  fileName  String
+  fileMime  String
+  fileSize  Int
+  createdAt DateTime @default(now())
+
+  form Form @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  @@index([formId, userId])
+}
