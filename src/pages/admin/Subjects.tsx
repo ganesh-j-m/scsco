@@ -132,6 +132,7 @@ function SubjectModal({ target, academic, onClose, onSaved }: { target: SubjectR
         <FormField label="Assigned faculty" id="sb-fac">
           <select id="sb-fac" className="input" disabled={!course} {...register("facultyId")}><option value="">Not assigned</option>{faculty.data?.data.map((f) => <option key={f.id} value={f.id}>{f.user.name} ({f.employeeId})</option>)}</select>
           <p className="mt-1 text-xs text-slate-500">Only active faculty of the course's department can be assigned.</p>
+          {course && faculty.data && faculty.data.data.length === 0 && <p role="status" className="mt-1 text-xs text-amber-700">No active faculty in this course's department yet. Add the teacher in Faculty (same department) first, then come back and assign.</p>}
         </FormField>
         <div className="flex justify-end gap-2 pt-2">
           <button type="button" className="btn-secondary" onClick={onClose}>Cancel</button>

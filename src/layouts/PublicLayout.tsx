@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import { LoadingState } from "@/components/ui";
 import { useState } from "react";
 import { Link, NavLink, Outlet } from "react-router-dom";
 import { GraduationCap, Mail, MapPin, Menu, Phone, X } from "lucide-react";
@@ -64,7 +66,7 @@ export default function PublicLayout() {
           )}
         </AnimatePresence>
       </header>
-      <main id="main-content" tabIndex={-1} className="flex-1 outline-none"><Outlet /></main>
+      <main id="main-content" tabIndex={-1} className="flex-1 outline-none"><Suspense fallback={<LoadingState rows={4} />}><Outlet /></Suspense></main>
       <footer className="border-t border-slate-200 bg-brand-900 text-brand-100">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-4">
           <div className="md:col-span-2">

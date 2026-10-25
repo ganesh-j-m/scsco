@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { GraduationCap, LogOut, Menu, X } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
+import { LoadingState } from "@/components/ui";
 import { useAuth } from "@/context/AuthContext";
 import { adminNav } from "@/routes/adminNav";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -10,6 +11,9 @@ export default function AdminLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const { pathname } = useLocation();
+  // Always close the mobile menu once the page changes.
+  useEffect(() => { setOpen(false); }, [pathname]);
 
   // Hide links the role cannot use. The API still enforces access on every request.
   const nav = useMemo(
@@ -59,17 +63,15 @@ export default function AdminLayout() {
         {brand}
         {sidebar}
       </aside>
-      <AnimatePresence>
-        {open && (
-          <motion.div className="fixed inset-0 z-50 lg:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>
+      {open && (
+          <motion.div className="fixed inset-0 z-50 lg:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }}>
             <div className="absolute inset-0 bg-slate-900/40" onClick={() => setOpen(false)} />
-            <motion.aside initial={{ x: -280 }} animate={{ x: 0 }} exit={{ x: -280 }} transition={{ duration: 0.2 }} className="relative flex h-full w-64 flex-col bg-white">
+            <motion.aside initial={{ x: -280 }} animate={{ x: 0 }} transition={{ duration: 0.2 }} className="relative flex h-full w-64 flex-col bg-white">
               {brand}
               {sidebar}
             </motion.aside>
           </motion.div>
-        )}
-      </AnimatePresence>
+      )}
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4">
           <button className="lg:hidden" onClick={() => setOpen(!open)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open}>{open ? <X /> : <Menu />}</button>
@@ -90,7 +92,7 @@ export default function AdminLayout() {
             </button>
           </div>
         </header>
-        <main id="main-content" tabIndex={-1} className="flex-1 p-4 outline-none md:p-6"><Outlet /></main>
+        <main id="main-content" tabIndex={-1} className="flex-1 p-4 outline-none md:p-6"><Suspense fallback={<LoadingState rows={4} />}><Outlet /></Suspense></main>
       </div>
     </div>
   );
