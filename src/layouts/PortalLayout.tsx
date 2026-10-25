@@ -5,7 +5,7 @@ import { GraduationCap, LogOut } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { NotificationBell } from "@/components/NotificationBell";
 
-const links = ["dashboard", "profile", "attendance", "assignments", "study-material", "exams", "results", "fees", "certificates", "placements", "library", "grievances", "forms", "notifications"];
+const links = ["dashboard", "profile", "attendance", "scan", "assignments", "study-material", "exams", "results", "fees", "certificates", "placements", "library", "grievances", "forms", "notifications"];
 
 export default function PortalLayout() {
   const { user, logout } = useAuth();
@@ -29,7 +29,7 @@ export default function PortalLayout() {
         <nav className="mx-auto flex max-w-7xl gap-1 overflow-x-auto px-4 pb-2" aria-label="Portal">
           {links.map((l) => (
             <NavLink key={l} to={`/portal/${l}`} className={({ isActive }) => `whitespace-nowrap rounded-md px-3 py-1.5 text-sm capitalize ${isActive ? "bg-brand-50 font-medium text-brand-700" : "text-slate-600 hover:bg-slate-50"}`}>
-              {l.replace(/-/g, " ")}
+              {l === "scan" ? "Scan QR" : l.replace(/-/g, " ")}
             </NavLink>
           ))}
         </nav>

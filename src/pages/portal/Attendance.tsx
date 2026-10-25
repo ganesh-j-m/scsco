@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { QrCode } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 import { useApi } from "@/hooks/useApi";
 import { Badge, EmptyState, ErrorState, LoadingState, PageHeader } from "@/components/ui";
 import type { MyAttendance } from "@/types/admin";
@@ -7,6 +10,7 @@ const barTone = (p: number) => (p >= 75 ? "bg-green-500" : p >= 60 ? "bg-amber-5
 const textTone = (p: number) => (p >= 75 ? "text-green-700" : p >= 60 ? "text-amber-700" : "text-red-700");
 
 export default function PortalAttendance() {
+  const { user } = useAuth();
   const children = useApi<{ data: { id: string; studentId: string; name: string }[] }>("/attendance/children");
   const [selected, setSelected] = useState("");
   const kids = children.data?.data ?? [];
@@ -19,7 +23,7 @@ export default function PortalAttendance() {
 
   return (
     <>
-      <PageHeader title="Attendance" subtitle="Present and late both count as attended" />
+      <PageHeader title="Attendance" subtitle="Present and late both count as attended" actions={user?.role === "STUDENT" ? <Link to="/portal/scan" className="btn-primary"><QrCode className="h-4 w-4" /> Scan QR</Link> : undefined} />
       {kids.length > 1 && (
         <div className="mb-4">
           <label htmlFor="child" className="mr-2 text-sm text-slate-600">Student</label>

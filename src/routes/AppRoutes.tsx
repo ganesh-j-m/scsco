@@ -85,6 +85,7 @@ const AssignmentsAdmin = lazy(() => import("@/pages/admin/CourseWork").then((m) 
 const StudyMaterialAdmin = lazy(() => import("@/pages/admin/CourseWork").then((m) => ({ default: m.StudyMaterial })));
 const PortalAssignments = lazy(() => import("@/pages/portal/CourseWork").then((m) => ({ default: m.PortalAssignments })));
 const PortalStudyMaterial = lazy(() => import("@/pages/portal/CourseWork").then((m) => ({ default: m.PortalStudyMaterial })));
+const PortalScan = lazy(() => import("@/pages/portal/ScanQr"));
 const PortalExams = lazy(() => import("@/pages/portal/Exams"));
 const PortalProfile = lazy(() => import("@/pages/portal/Profile"));
 const PortalDashboard = lazy(() => import("@/pages/portal/Dashboard"));
@@ -179,6 +180,7 @@ export default function AppRoutes() {
             <Route index element={<PortalDashboard />} />
             <Route path="dashboard" element={<PortalDashboard />} />
             <Route path="attendance" element={<PortalAttendance />} />
+            <Route path="scan" element={<PortalScan />} />
             <Route path="exams" element={<PortalExams />} />
             <Route path="assignments" element={<PortalAssignments />} />
             <Route path="study-material" element={<PortalStudyMaterial />} />
@@ -192,7 +194,7 @@ export default function AppRoutes() {
             <Route path="notifications" element={<PortalNotifications />} />
             <Route path="forms" element={<PortalForms />} />
             <Route path="forms/:id" element={<FormFill />} />
-            {PORTAL_PATHS.filter((p) => !["attendance", "exams", "assignments", "study-material", "profile", "results", "fees", "certificates", "placements", "library", "grievances", "notifications", "forms"].includes(p)).map((p) => (
+            {PORTAL_PATHS.filter((p) => !["attendance", "scan", "exams", "assignments", "study-material", "profile", "results", "fees", "certificates", "placements", "library", "grievances", "notifications", "forms"].includes(p)).map((p) => (
               <Route key={p} path={p} element={<ComingSoon title={p.replace(/-/g, " ")} phase="Phase 3-8" />} />
             ))}
           </Route>
