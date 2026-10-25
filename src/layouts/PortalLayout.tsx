@@ -1,7 +1,8 @@
 import { Suspense } from "react";
 import { LoadingState } from "@/components/ui";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Navigate, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { GraduationCap, LogOut } from "lucide-react";
+import { STAFF_ROLES } from "@/routes/guards";
 import { useAuth } from "@/context/AuthContext";
 import { NotificationBell } from "@/components/NotificationBell";
 
@@ -10,6 +11,7 @@ const links = ["dashboard", "profile", "attendance", "scan", "assignments", "stu
 export default function PortalLayout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  if (user && STAFF_ROLES.includes(user.role)) return <Navigate to="/admin/dashboard" replace />;
   return (
     <div className="min-h-screen">
       <header className="border-b border-slate-200 bg-white">

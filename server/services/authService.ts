@@ -31,6 +31,7 @@ export function homeRouteFor(role: Role): string {
     case "ADMIN":
     case "PRINCIPAL":
     case "HOD":
+    case "FACULTY":
       return "/admin/dashboard";
     default:
       return "/portal/dashboard";

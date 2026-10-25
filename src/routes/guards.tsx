@@ -6,8 +6,11 @@ import type { Role } from "@/types";
 // These only decide which UI to show. The API enforces the real permissions.
 export const ADMIN_PANEL_ROLES: Role[] = ["SUPER_ADMIN", "ADMIN", "PRINCIPAL", "HOD"];
 
+// Faculty work in the staff panel (QR attendance, assignments, forms); the portal is for students and parents.
+export const STAFF_ROLES: Role[] = [...ADMIN_PANEL_ROLES, "FACULTY"];
+
 export function homeFor(role: Role) {
-  return ADMIN_PANEL_ROLES.includes(role) ? "/admin/dashboard" : "/portal/dashboard";
+  return STAFF_ROLES.includes(role) ? "/admin/dashboard" : "/portal/dashboard";
 }
 
 export function RequireRole({ roles, area }: { roles: Role[]; area: "admin" | "portal" }) {
