@@ -120,6 +120,17 @@ export function PrincipalProfile() {
   );
 }
 
+export function PresidentProfile() {
+  return (
+    <Page title="President profile" subtitle="Shown on the President's Message page and the homepage">
+      {(c) => <BlockEditor blockKey="site.president" title="President" initial={c["site.president"]} specs={[
+        { key: "name", label: "Name", kind: "text", half: true }, { key: "designation", label: "Designation (e.g. President)", kind: "text", half: true },
+        { key: "photoUrl", label: "Photo", kind: "image" }, { key: "message", label: "Message", kind: "textarea" },
+      ]} />}
+    </Page>
+  );
+}
+
 export function ContactInfo() {
   return (
     <Page title="Contact" subtitle="Address and contact details on the Contact page">

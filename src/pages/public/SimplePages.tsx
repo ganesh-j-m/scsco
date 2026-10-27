@@ -26,6 +26,23 @@ export function About() {
   );
 }
 
+export function PresidentMessage() {
+  const p = useSite().site["site.president"];
+  return (
+    <>
+      <PageHero title="President's message" />
+      <Section>
+        {p?.message ? (
+          <div className="grid gap-8 md:grid-cols-[240px_1fr]">
+            <div><div className="overflow-hidden rounded-xl"><LazyImage src={p.photoUrl} alt={p.name ?? "President"} ratio="aspect-[4/5]" /></div><p className="mt-3 font-medium">{p.name}</p><p className="text-sm text-slate-500">{p.designation}</p></div>
+            <p className="whitespace-pre-line text-slate-700">{p.message}</p>
+          </div>
+        ) : <p className="text-sm text-slate-500">The president's message has not been published yet.</p>}
+      </Section>
+    </>
+  );
+}
+
 export function PrincipalMessage() {
   const p = useSite().site["site.principal"];
   return (

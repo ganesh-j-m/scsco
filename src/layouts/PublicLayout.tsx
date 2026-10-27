@@ -76,7 +76,7 @@ export default function PublicLayout() {
             {contact.email && <p className="mt-1 flex gap-2 text-sm"><Mail className="h-4 w-4 shrink-0" aria-hidden />{contact.email}</p>}
           </div>
           <FooterLinks title="Academics" items={[["Departments", "/departments"], ["Courses", "/courses"], ["Faculty", "/faculty"], ["Placements", "/placements"]]} />
-          <FooterLinks title="Quick links" items={[["Admissions", "/admissions"], ["Notices", "/notices"], ["Gallery", "/gallery"], ["Contact", "/contact"], ["Login", "/login"]]} />
+          <FooterLinks title="Quick links" items={[["Admissions", "/admissions"], ["President's message", "/president-message"], ["Principal's message", "/principal-message"], ["Notices", "/notices"], ["Gallery", "/gallery"], ["Contact", "/contact"], ["Login", "/login"]]} />
         </div>
         <p className="border-t border-white/10 py-4 text-center text-xs">© {new Date().getFullYear()} Sharadabai Pawar College, Omerga. All rights reserved.</p>
       </footer>

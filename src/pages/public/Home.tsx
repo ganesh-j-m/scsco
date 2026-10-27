@@ -9,6 +9,7 @@ export default function Home() {
   const { site } = useSite();
   const hero = site["site.hero"];
   const about = site["site.about"];
+  const president = site["site.president"];
   const principal = site["site.principal"];
   const stats = useApi<Stats>("/public/stats");
   const depts = useApi<List<Department>>("/public/departments");
@@ -125,19 +126,22 @@ export default function Home() {
         </DataState>
       </Section>
 
-      {principal?.message && (
-        <Section tone="slate">
+      {[
+        { who: president, title: "From the President", to: "/president-message", fallback: "President" },
+        { who: principal, title: "From the Principal", to: "/principal-message", fallback: "Principal" },
+      ].filter((m) => m.who?.message).map((m, i) => (
+        <Section key={m.to} tone={i % 2 === 0 ? "slate" : undefined}>
           <div className="card grid items-center gap-6 p-6 md:grid-cols-[180px_1fr]">
-            <div className="mx-auto w-40 overflow-hidden rounded-xl md:w-full"><LazyImage src={principal.photoUrl} alt={principal.name ?? "Principal"} ratio="aspect-[4/5]" /></div>
+            <div className="mx-auto w-40 overflow-hidden rounded-xl md:w-full"><LazyImage src={m.who!.photoUrl} alt={m.who!.name ?? m.fallback} ratio="aspect-[4/5]" /></div>
             <div>
-              <h2 className="text-lg font-semibold">From the Principal</h2>
-              <p className="mt-2 line-clamp-4 text-slate-600">{principal.message}</p>
-              <p className="mt-3 text-sm font-medium">{principal.name}<span className="font-normal text-slate-500"> · {principal.designation}</span></p>
-              <Link to="/principal-message" className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-brand-600">Read full message <ArrowRight className="h-4 w-4" /></Link>
+              <h2 className="text-lg font-semibold">{m.title}</h2>
+              <p className="mt-2 line-clamp-4 text-slate-600">{m.who!.message}</p>
+              <p className="mt-3 text-sm font-medium">{m.who!.name}<span className="font-normal text-slate-500"> · {m.who!.designation}</span></p>
+              <Link to={m.to} className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-brand-600">Read full message <ArrowRight className="h-4 w-4" /></Link>
             </div>
           </div>
         </Section>
-      )}
+      ))}
     </>
   );
 }

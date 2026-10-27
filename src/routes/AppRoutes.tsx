@@ -13,6 +13,7 @@ const Home = lazy(() => import("@/pages/public/Home"));
 const Login = lazy(() => import("@/pages/public/Login"));
 const S = {
   About: lazy(() => import("@/pages/public/SimplePages").then((m) => ({ default: m.About }))),
+  PresidentMessage: lazy(() => import("@/pages/public/SimplePages").then((m) => ({ default: m.PresidentMessage }))),
   PrincipalMessage: lazy(() => import("@/pages/public/SimplePages").then((m) => ({ default: m.PrincipalMessage }))),
   Academics: lazy(() => import("@/pages/public/SimplePages").then((m) => ({ default: m.Academics }))),
   Departments: lazy(() => import("@/pages/public/SimplePages").then((m) => ({ default: m.Departments }))),
@@ -29,7 +30,7 @@ const S = {
   Admissions: lazy(() => import("@/pages/public/ListPages").then((m) => ({ default: m.Admissions }))),
 };
 const publicRoutes: [string, React.LazyExoticComponent<() => JSX.Element>][] = [
-  ["about", S.About], ["principal-message", S.PrincipalMessage], ["academics", S.Academics], ["departments", S.Departments],
+  ["about", S.About], ["president-message", S.PresidentMessage], ["principal-message", S.PrincipalMessage], ["academics", S.Academics], ["departments", S.Departments],
   ["courses", S.Courses], ["faculty", S.Faculty], ["admissions", S.Admissions], ["campus-life", S.CampusLife],
   ["facilities", S.Facilities], ["events", S.Events], ["gallery", S.Gallery], ["achievements", S.Achievements],
   ["placements", S.Placements], ["notices", S.Notices], ["contact", S.Contact],
@@ -75,6 +76,7 @@ const CmsFacilities = lazy(() => import("@/pages/admin/cmsPages").then((m) => ({
 const CmsAchievements = lazy(() => import("@/pages/admin/cmsPages").then((m) => ({ default: m.Achievements })));
 const CmsHomepage = lazy(() => import("@/pages/admin/SiteBlocks").then((m) => ({ default: m.Homepage })));
 const CmsPrincipal = lazy(() => import("@/pages/admin/SiteBlocks").then((m) => ({ default: m.PrincipalProfile })));
+const CmsPresident = lazy(() => import("@/pages/admin/SiteBlocks").then((m) => ({ default: m.PresidentProfile })));
 const CmsContact = lazy(() => import("@/pages/admin/SiteBlocks").then((m) => ({ default: m.ContactInfo })));
 const CmsAdmissionsInfo = lazy(() => import("@/pages/admin/SiteBlocks").then((m) => ({ default: m.AdmissionsInfo })));
 const PortalForms = lazy(() => import("@/pages/portal/Forms"));
@@ -128,6 +130,7 @@ const implemented: Record<string, React.LazyExoticComponent<() => JSX.Element>> 
   "/admin/facilities": CmsFacilities,
   "/admin/achievements": CmsAchievements,
   "/admin/campus-content": CmsHomepage,
+  "/admin/president-profile": CmsPresident,
   "/admin/principal-profile": CmsPrincipal,
   "/admin/contact": CmsContact,
   "/admin/admissions-info": CmsAdmissionsInfo,

@@ -120,6 +120,7 @@ const imgOrBlank = z.string().trim().max(500).default("").refine((v) => v === ""
 const blocks: Record<string, { roles: Role[]; schema: z.ZodTypeAny }> = {
   "site.hero": { roles: A, schema: z.object({ title: text(150), subtitle: text(250), imageUrl: imgOrBlank, ctaLabel: text(40) }) },
   "site.about": { roles: A, schema: z.object({ summary: text(3000), mission: text(1500), vision: text(1500), imageUrl: imgOrBlank, highlights: list(200, 10) }) },
+  "site.president": { roles: AP, schema: z.object({ name: text(120), designation: text(120), photoUrl: imgOrBlank, message: text(6000) }) },
   "site.principal": { roles: AP, schema: z.object({ name: text(120), designation: text(120), photoUrl: imgOrBlank, message: text(6000) }) },
   "site.contact": { roles: A, schema: z.object({ address: text(300), phone: text(40), email: z.string().trim().max(120).default("").refine((v) => v === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), "Enter a valid email"), hours: text(120), mapUrl: z.string().trim().max(500).default("").refine((v) => v === "" || /^https?:\/\/\S+$/i.test(v), "Enter a valid https link") }) },
   "site.admissions": { roles: A, schema: z.object({ intro: text(2000), steps: list(300, 15), documents: list(200, 20) }) },
