@@ -1,3 +1,4 @@
+import assistantRouter from "./routes/assistant.js";
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
@@ -9,6 +10,7 @@ import { config } from "./config.js";
 import api from "./routes/index.js";
 import { errorMiddleware, forbidden } from "./utils/errors.js";
 
+
 export function createApp() {
   const app = express();
   app.set("trust proxy", Number(process.env.TRUST_PROXY ?? 1)); // hops between the internet and this server (2 = Vercel proxy + host proxy)
@@ -17,6 +19,7 @@ export function createApp() {
   app.use(cors({ origin: config.clientOrigin, credentials: true }));
   app.use(express.json({ limit: "1mb" }));
   app.use(cookieParser());
+  app.use("/api/assistant", assistantRouter);
 
   // Defence in depth against cross-site request forgery: in production a browser request that
   // changes data must come from our own site. (Skipped in development so phones on the LAN can test.)

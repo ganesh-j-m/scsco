@@ -1,3 +1,4 @@
+import { AssistantWidget } from "@/components/AssistantWidget";
 import { Suspense } from "react";
 import { LoadingState } from "@/components/ui";
 import { useState } from "react";
@@ -28,7 +29,7 @@ export default function PublicLayout() {
               <GraduationCap className="h-5 w-5" />
             </span>
             <span className="text-sm font-semibold leading-tight text-slate-900">
-              Sharadabai Pawar College
+              Chatrapati Shivaji College
               <span className="block text-xs font-normal text-slate-500">Omerga</span>
             </span>
           </Link>
@@ -67,10 +68,11 @@ export default function PublicLayout() {
         </AnimatePresence>
       </header>
       <main id="main-content" tabIndex={-1} className="flex-1 outline-none"><Suspense fallback={<LoadingState rows={4} />}><Outlet /></Suspense></main>
+      <AssistantWidget />
       <footer className="border-t border-slate-200 bg-brand-900 text-brand-100">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 md:grid-cols-4">
           <div className="md:col-span-2">
-            <p className="font-semibold text-white">Sharadabai Pawar College, Omerga</p>
+            <p className="font-semibold text-white">Shri Chatrapati Shivaji College, Omerga</p>
             {contact.address && <p className="mt-2 flex gap-2 text-sm"><MapPin className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />{contact.address}</p>}
             {contact.phone && <p className="mt-1 flex gap-2 text-sm"><Phone className="h-4 w-4 shrink-0" aria-hidden />{contact.phone}</p>}
             {contact.email && <p className="mt-1 flex gap-2 text-sm"><Mail className="h-4 w-4 shrink-0" aria-hidden />{contact.email}</p>}

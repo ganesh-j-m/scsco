@@ -1,3 +1,4 @@
+import { AssistantWidget } from "@/components/AssistantWidget";
 import { Suspense } from "react";
 import { LoadingState } from "@/components/ui";
 import { Navigate, NavLink, Outlet, useNavigate } from "react-router-dom";
@@ -37,6 +38,7 @@ export default function PortalLayout() {
         </nav>
       </header>
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-7xl p-4 outline-none md:p-6"><Suspense fallback={<LoadingState rows={4} />}><Outlet /></Suspense></main>
+      <AssistantWidget />
     </div>
   );
 }

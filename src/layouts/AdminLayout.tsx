@@ -1,3 +1,4 @@
+import { AssistantWidget } from "@/components/AssistantWidget";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { GraduationCap, LogOut, Menu, X } from "lucide-react";
@@ -64,13 +65,13 @@ export default function AdminLayout() {
         {sidebar}
       </aside>
       {open && (
-          <motion.div className="fixed inset-0 z-50 lg:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }}>
-            <div className="absolute inset-0 bg-slate-900/40" onClick={() => setOpen(false)} />
-            <motion.aside initial={{ x: -280 }} animate={{ x: 0 }} transition={{ duration: 0.2 }} className="relative flex h-full w-64 flex-col bg-white">
-              {brand}
-              {sidebar}
-            </motion.aside>
-          </motion.div>
+        <motion.div className="fixed inset-0 z-50 lg:hidden" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.15 }}>
+          <div className="absolute inset-0 bg-slate-900/40" onClick={() => setOpen(false)} />
+          <motion.aside initial={{ x: -280 }} animate={{ x: 0 }} transition={{ duration: 0.2 }} className="relative flex h-full w-64 flex-col bg-white">
+            {brand}
+            {sidebar}
+          </motion.aside>
+        </motion.div>
       )}
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4">
@@ -93,6 +94,7 @@ export default function AdminLayout() {
           </div>
         </header>
         <main id="main-content" tabIndex={-1} className="flex-1 p-4 outline-none md:p-6"><Suspense fallback={<LoadingState rows={4} />}><Outlet /></Suspense></main>
+        <AssistantWidget />
       </div>
     </div>
   );
