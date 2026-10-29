@@ -80,12 +80,12 @@ export default function PublicLayout() {
           <FooterLinks title="Academics" items={[["Departments", "/departments"], ["Courses", "/courses"], ["Faculty", "/faculty"], ["Placements", "/placements"]]} />
           <FooterLinks title="Quick links" items={[["Admissions", "/admissions"], ["President's message", "/president-message"], ["Principal's message", "/principal-message"], ["Notices", "/notices"], ["Gallery", "/gallery"], ["Contact", "/contact"], ["Login", "/login"]]} />
         </div>
-        <div className="border-t border-white/10 py-4 text-xs flex items-center justify-between gap-4">
-          <p className="text-left p-2">
+        <div className="border-t border-white/10 py-4 text-xs flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-left">
             © {new Date().getFullYear()} Shri Chatrapati Shivaji College, Omerga. All rights reserved.
           </p>
 
-          <p className="text-right p-2">
+          <p className="text-right">
             {new Date().getFullYear()} Design and Developed By Ganesh More
           </p>
         </div>
