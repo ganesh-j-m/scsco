@@ -24,9 +24,48 @@ function looksLikeImage(file: string, mime: string) {
   return false;
 }
 
+// ───────────── permanent storage on Cloudinary (used when the 3 CLOUDINARY_* variables are set) ─────────────
+const cloud = {
+  name: process.env.CLOUDINARY_CLOUD_NAME,
+  key: process.env.CLOUDINARY_API_KEY,
+  secret: process.env.CLOUDINARY_API_SECRET,
+};
+const useCloudinary = Boolean(cloud.name && cloud.key && cloud.secret);
+
+/** Signed upload through Cloudinary's REST API (no extra npm package). Returns the permanent https URL. */
+async function uploadToCloudinary(file: string, mime: string, publicId: string): Promise<string> {
+  const timestamp = String(Math.floor(Date.now() / 1000));
+  const folder = "scsco";
+  // signature = sha1 of the sorted params (not file/api_key) + api secret
+  const toSign = `folder=${folder}&public_id=${publicId}&timestamp=${timestamp}`;
+  const signature = crypto.createHash("sha1").update(toSign + cloud.secret).digest("hex");
+  const form = new FormData();
+  form.append("file", new Blob([await fs.promises.readFile(file)], { type: mime }), `${publicId}`);
+  form.append("api_key", cloud.key!);
+  form.append("timestamp", timestamp);
+  form.append("folder", folder);
+  form.append("public_id", publicId);
+  form.append("signature", signature);
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 30_000);
+  try {
+    const r = await fetch(`https://api.cloudinary.com/v1_1/${cloud.name}/image/upload`, { method: "POST", body: form, signal: ctrl.signal });
+    const j = (await r.json().catch(() => ({}))) as { secure_url?: string; error?: { message?: string } };
+    if (!r.ok || !j.secure_url) {
+      console.error("cloudinary upload failed:", r.status, j.error?.message ?? "");
+      throw new Error("Image storage failed. Please try again.");
+    }
+    // f_auto,q_auto = Cloudinary serves the smallest good-looking format for each visitor
+    return j.secure_url.replace("/upload/", "/upload/f_auto,q_auto/");
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 const ALLOWED: Record<string, string> = { "image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp" };
 const dir = path.resolve(config.uploadDir, "images");
-fs.mkdirSync(dir, { recursive: true });
+fs.mkdirSync(dir, { recursive: true }); // also used as the temporary folder while Cloudinary uploads
 
 const upload = multer({
   storage: multer.diskStorage({
@@ -51,6 +90,20 @@ router.post(
       fs.unlink(req.file.path, () => undefined);
       throw badRequest("This file is not a valid JPG, PNG or WebP image");
     }
+    if (useCloudinary) {
+      const id = path.parse(req.file.filename).name;
+      try {
+        const url = await uploadToCloudinary(req.file.path, req.file.mimetype, id);
+        await audit(req, "IMAGE_UPLOADED", "Upload", id);
+        res.status(201).json({ url });
+      } catch (e) {
+        throw badRequest((e as Error).message);
+      } finally {
+        fs.unlink(req.file.path, () => undefined); // the permanent copy lives on Cloudinary
+      }
+      return;
+    }
+    // fallback (no Cloudinary variables): local disk, lost when Render redeploys
     await audit(req, "IMAGE_UPLOADED", "Upload", req.file.filename);
     res.status(201).json({ url: `/uploads/images/${req.file.filename}` });
   }),
