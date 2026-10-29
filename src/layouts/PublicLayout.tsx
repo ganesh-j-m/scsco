@@ -80,7 +80,9 @@ export default function PublicLayout() {
           <FooterLinks title="Academics" items={[["Departments", "/departments"], ["Courses", "/courses"], ["Faculty", "/faculty"], ["Placements", "/placements"]]} />
           <FooterLinks title="Quick links" items={[["Admissions", "/admissions"], ["President's message", "/president-message"], ["Principal's message", "/principal-message"], ["Notices", "/notices"], ["Gallery", "/gallery"], ["Contact", "/contact"], ["Login", "/login"]]} />
         </div>
-        <p className="border-t border-white/10 py-4 text-center text-xs">© {new Date().getFullYear()} Sharadabai Pawar College, Omerga. All rights reserved.</p>
+        <p className="border-t border-white/10 py-4 text-center text-xs">© {new Date().getFullYear()}  Shri Chatrapati Shivaji College, Omerga. All rights reserved.</p>
+        <p className="border-t border-white/10 py-4 text-center text-xs">{new Date().getFullYear()}  Design and Developed By Ganesh More</p>
+
       </footer>
     </div>
   );
