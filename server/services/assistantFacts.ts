@@ -23,6 +23,15 @@ ADMISSION RULES
 - Documents: Leaving Certificate (TC/LC), marks memo, passport photo, caste certificate (backward class), eligibility and migration certificates (students from other states), progeny certificate, income certificate + EBC form, Aadhaar copy, ABC account number (senior college), e-mail ID, parent's Aadhaar (junior college).
 - Enquiry / admission committee office: 02475-252020.
 
+SCHOLARSHIPS AND HELP
+- Many scholarships exist: EBC, government backward-class (post-matric), minority, disabled, Eklavya (PG), freedom-fighter and ex-servicemen wards, state open-merit and others, plus college prizes and a Student Aid Fund for poor students (fees, books, medicine). The college recommends the application; sanction and payment come from the government department into the student's nationalised-bank account. Students must apply every year. Documents vary by scholarship; ask the office.
+
+STUDENT LIFE
+- Night study room Mon-Sat 6:00-11:30 pm (till 12:00 in exam period). Girls' and boys' hostels, library with night reading room, Wi-Fi campus, Yashwantrao Chavan Open University study centre, health and yoga centre, gymnasium, shooting training centre, NCC (54 cadets), NSS, Rotaract, Red Ribbon Club, cultural department, placement cell.
+- Ragging is strictly prohibited; an anti-ragging committee exists and punishments include rustication. Students must carry ID cards.
+`;
+
+export const FEES_FACTS = `
 FEES 2026-27 (Rs, approximate; the University can change fee structure; confirm at the office)
 Format: course = Open/EBC, SC/ST, OBC/NT/SEBC, Paying (paying = for students who did not fill the EBC/GOI form)
 Junior college (Open/EBC, OBC/NT, Paying): XI Science 1085/1035/1277; XI Science(IT) 2285/2285/2477; XI Science(GCE) 3485/3485/3677; XII Science 1085/1035/1326; XII Science(IT) 2285/1035/1326; XII Science(GCE) 3485/1035/3726; XI Arts 580/370/772; XII Arts 580/370/821; XI Commerce 580/370/772; XII Commerce 580/470/821; XI MCVC 1780/1550/2020; XII MCVC 1755/1525/2080.
@@ -32,11 +41,4 @@ B.Com I 1919/1857/615/2719; B.Com II 1504/1462/250/2304; B.Com III 1404/1402/250
 BCS / B.Sc(IT) I 0/20326/0/33518; II 0/19971/0/33153; III 0/19911/0/33053.
 M.A. Marathi/Hindi/English/Sociology/Political Sci/History: Year I 0/3400/665/5308, Year II 0/3045/300/4943. M.A. Geography: Year I 0/4126/665/6518, Year II 0/3771/300/6153.
 M.Com I 0/3664/665/5671; II 0/3309/300/5306. M.Sc (Physics & Chemistry) I 0/12838/665/21038; II 0/12483/300/20673.
-
-SCHOLARSHIPS AND HELP
-- Many scholarships exist: EBC, government backward-class (post-matric), minority, disabled, Eklavya (PG), freedom-fighter and ex-servicemen wards, state open-merit and others, plus college prizes and a Student Aid Fund for poor students (fees, books, medicine). The college recommends the application; sanction and payment come from the government department into the student's nationalised-bank account. Students must apply every year. Documents vary by scholarship; ask the office.
-
-STUDENT LIFE
-- Night study room Mon-Sat 6:00-11:30 pm (till 12:00 in exam period). Girls' and boys' hostels, library with night reading room, Wi-Fi campus, Yashwantrao Chavan Open University study centre, health and yoga centre, gymnasium, shooting training centre, NCC (54 cadets), NSS, Rotaract, Red Ribbon Club, cultural department, placement cell.
-- Ragging is strictly prohibited; an anti-ragging committee exists and punishments include rustication. Students must carry ID cards.
 `;

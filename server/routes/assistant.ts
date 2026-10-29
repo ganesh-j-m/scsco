@@ -6,7 +6,7 @@ import { config } from "../config.js";
 import { prisma } from "../utils/prisma.js";
 import { asyncHandler } from "../utils/errors.js";
 import type { TokenPayload } from "../middleware/auth.js";
-import { STATIC_FACTS } from "../services/assistantFacts.js";
+import { STATIC_FACTS, FEES_FACTS } from "../services/assistantFacts.js";
 
 /**
  * College assistant.
@@ -136,11 +136,12 @@ async function personalReply(user: { id: string; role: string } | null, text: st
 }
 
 // ───────────── college knowledge from the database (cached 10 min) ─────────────
-let knowledge: { at: number; text: string } | null = null;
+let knowledge: { at: number; core: string; faculty: string } | null = null;
 const clip = (s: string | null | undefined, n: number) => (s ?? "").replace(/\s+/g, " ").trim().slice(0, n);
 
-async function collegeKnowledge(): Promise<string> {
-  if (knowledge && Date.now() - knowledge.at < 10 * 60_000) return knowledge.text;
+async function collegeKnowledge(withFaculty: boolean, withFees: boolean): Promise<string> {
+  const extra = (k: { faculty: string }) => (withFees ? FEES_FACTS : "") + (withFaculty ? k.faculty : "");
+  if (knowledge && Date.now() - knowledge.at < 10 * 60_000) return knowledge.core + extra(knowledge);
   const [site, depts, courses, facilities, achievements, events, notices, placements, faculty] = await Promise.all([
     prisma.siteContent.findMany({ where: { key: { in: ["site.about", "site.contact", "site.admissions", "site.campus", "site.principal", "site.president"] } } }),
     prisma.department.findMany({ where: { status: "ACTIVE" }, select: { name: true, description: true, hod: { select: { user: { select: { name: true } } } } }, orderBy: { name: "asc" } }),
@@ -154,7 +155,7 @@ async function collegeKnowledge(): Promise<string> {
   ]);
   const v = (k: string) => (site.find((s) => s.key === k)?.value ?? {}) as Record<string, any>;
   const about = v("site.about"), contact = v("site.contact"), adm = v("site.admissions"), camp = v("site.campus");
-  const parts: string[] = [STATIC_FACTS];
+  const parts: string[] = [STATIC_FACTS]; // prospectus facts always included
   const sec = (title: string, lines: string[]) => lines.filter(Boolean).length && parts.push(`\n${title}\n${lines.filter(Boolean).join("\n")}`);
   sec("WEBSITE - ABOUT", [clip(about.summary, 1500), about.mission && `Mission: ${clip(about.mission, 300)}`, ...(about.highlights ?? []).map((h: string) => `- ${clip(h, 200)}`)]);
   sec("WEBSITE - CONTACT", [contact.address && `Address: ${clip(contact.address, 300)}`, contact.phone && `Phone: ${contact.phone}`, contact.email && `Email: ${contact.email}`, contact.hours && `Office hours: ${contact.hours}`]);
@@ -167,10 +168,12 @@ async function collegeKnowledge(): Promise<string> {
   sec("UPCOMING EVENTS", events.map((e) => `- ${e.title} on ${dmy(e.date)}${e.venue ? ` at ${e.venue}` : ""}`));
   sec("LATEST NOTICES", notices.map((n) => `- ${n.title}${n.publishedAt ? ` (${dmy(n.publishedAt)})` : ""}`));
   sec("PLACEMENTS", placements.map((p) => `- ${p.company}: ${p.jobTitle}${p.driveDate ? ` (${dmy(p.driveDate)})` : ""}`));
+  const core = parts.join("\n").slice(0, 16000);
+  const before = parts.length;
   sec("FACULTY (name - designation, department, qualification)", faculty.map((f) => `- ${f.user.name} - ${f.designation ?? "Faculty"}, ${f.department.name}${f.qualification ? `, ${clip(f.qualification, 60)}` : ""}`));
-  const text = parts.join("\n").slice(0, 30000);
-  knowledge = { at: Date.now(), text };
-  return text;
+  const facultyText = parts.slice(before).join("\n").slice(0, 12000);
+  knowledge = { at: Date.now(), core, faculty: facultyText };
+  return core + extra(knowledge);
 }
 
 // ───────────── Gemini ─────────────
@@ -200,29 +203,38 @@ function normalize(history: { role: "user" | "assistant"; text: string }[], mess
 async function askGemini(info: string, history: { role: "user" | "assistant"; text: string }[], message: string): Promise<string | null> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("NO_KEY");
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
-  const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), 25_000);
-  try {
-    const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
-      method: "POST",
-      signal: ctrl.signal,
-      headers: { "Content-Type": "application/json", "x-goog-api-key": key },
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM(info) }] },
-        contents: normalize(history.slice(-6), message),
-        generationConfig: { temperature: 0.3, maxOutputTokens: 1024 },
-      }),
-    });
-    if (!r.ok) {
-      console.error("assistant: gemini", r.status, (await r.text()).slice(0, 200));
-      throw new Error(`GEMINI_${r.status}`);
+  const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+  const think = (process.env.GEMINI_THINKING || "minimal").toLowerCase(); // minimal | low | off
+  const call = async (withThinking: boolean) => {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 45_000);
+    try {
+      return await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
+        method: "POST",
+        signal: ctrl.signal,
+        headers: { "Content-Type": "application/json", "x-goog-api-key": key },
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: SYSTEM(info) }] },
+          contents: normalize(history.slice(-6), message),
+          generationConfig: {
+            temperature: 0.3,
+            maxOutputTokens: 2048,
+            ...(withThinking ? { thinkingConfig: { thinkingLevel: think } } : {}),
+          },
+        }),
+      });
+    } finally {
+      clearTimeout(timer);
     }
-    const j = (await r.json()) as any;
-    return (j?.candidates?.[0]?.content?.parts ?? []).map((p: any) => p?.text ?? "").join("").trim() || null;
-  } finally {
-    clearTimeout(timer);
+  };
+  let r = await call(think !== "off");
+  if (r.status === 400 && think !== "off") r = await call(false); // this model does not accept the thinking option
+  if (!r.ok) {
+    console.error("assistant: gemini", r.status, (await r.text()).slice(0, 200));
+    throw new Error(`GEMINI_${r.status}`);
   }
+  const j = (await r.json()) as any;
+  return (j?.candidates?.[0]?.content?.parts ?? []).map((p: any) => p?.text ?? "").join("").trim() || null;
 }
 
 // protects the shared free quota: total AI answers per day
@@ -254,7 +266,9 @@ router.post(
       return;
     }
     try {
-      const info = await collegeKnowledge();
+      const aboutPeople = /faculty|professor|prof\b|teacher|staff|\bhod\b|head|principal|dr\.|sir\b|madam|who is|कोण|शिक्षक|प्राध्यापक|प्राचार्य|विभागप्रमुख|विभाग प्रमुख|शिक्षिका|सर\b/i.test(message);
+      const aboutFees = /fee|fees|cost|charges|scholarship|फी|फीस|शुल्क|शिष्यवृत्ती|खर्च|पैसे|किती रुपये/i.test(message);
+      const info = await collegeKnowledge(aboutPeople, aboutFees);
       const reply = await askGemini(info, history, message);
       res.json({ reply: reply ?? (mr ? "क्षमस्व, उत्तर मिळाले नाही. कृपया 02475-252020 वर संपर्क करा." : "Sorry, I could not answer that. Please call the office on 02475-252020.") });
     } catch (e) {
