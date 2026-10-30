@@ -44,7 +44,7 @@ export default function Login() {
       <div className="card w-full max-w-sm p-6">
         <div className="mb-6 text-center">
           <span className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-600 text-white"><GraduationCap /></span>
-          <h1 className="text-lg font-semibold">Sharadabai Pawar College</h1>
+          <h1 className="text-lg font-semibold">Shri Chatrapati Shivaji College</h1>
           <p className="text-sm text-slate-500">Sign in to the campus portal</p>
         </div>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
