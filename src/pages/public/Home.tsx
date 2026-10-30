@@ -22,11 +22,11 @@ export default function Home() {
 
   const statCards = stats.data
     ? [
-        { label: "Students", value: stats.data.students, icon: GraduationCap },
-        { label: "Faculty", value: stats.data.faculty, icon: Users },
-        { label: "Departments", value: stats.data.departments, icon: Building2 },
-        { label: "Courses", value: stats.data.courses, icon: BookOpen },
-      ]
+      { label: "Students", value: stats.data.students, icon: GraduationCap },
+      { label: "Faculty", value: stats.data.faculty, icon: Users },
+      { label: "Departments", value: stats.data.departments, icon: Building2 },
+      { label: "Courses", value: stats.data.courses, icon: BookOpen },
+    ]
     : [];
 
   return (
@@ -34,7 +34,7 @@ export default function Home() {
       <section className="relative isolate overflow-hidden bg-brand-900 text-white">
         {hero?.imageUrl && <img src={hero.imageUrl} alt="" className="absolute inset-0 -z-10 h-full w-full object-cover opacity-30" fetchPriority="high" />}
         <div className="mx-auto max-w-7xl px-4 py-20 md:py-28">
-          <h1 className="max-w-2xl text-3xl font-semibold md:text-4xl">{hero?.title ?? "Sharadabai Pawar College, Omerga"}</h1>
+          <h1 className="max-w-2xl text-3xl font-semibold md:text-4xl">{hero?.title ?? "Shri Chatrapati Shivaji College, Omerga"}</h1>
           {hero?.subtitle && <p className="mt-3 max-w-xl text-brand-100">{hero.subtitle}</p>}
           <div className="mt-6 flex flex-wrap gap-3">
             <Link to="/admissions" className="btn bg-accent-500 text-white hover:bg-accent-600">{hero?.ctaLabel ?? "Apply now"}</Link>

@@ -12,15 +12,15 @@ const daysFromNow = (d: number) => new Date(Date.now() + d * 86_400_000);
 async function main() {
   const content: Record<string, unknown> = {
     "site.hero": {
-      title: "Sharadabai Pawar College, Omerga",
+      title: "Shri Chatrapati Shivaji College, Omerga",
       subtitle: "Quality education. Strong values. Bright careers.",
       imageUrl: img("scsco-hero", 1600, 800),
       ctaLabel: "Apply for admission",
     },
     "site.contact": {
-      address: "Sharadabai Pawar College, Omerga, Dharashiv, Maharashtra",
-      phone: "+91 00000 00000",
-      email: "info@example.edu",
+      address: "Shri Chatrapati Shivaji College, Omerga, Dharashiv, Maharashtra",
+      phone: "02475 252 020",
+      email: "scsco2001@yahoo.com",
       hours: "Mon - Sat, 9:00 AM - 5:00 PM",
       mapUrl: "",
     },

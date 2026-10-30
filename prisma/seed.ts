@@ -22,8 +22,8 @@ async function main() {
   });
 
   const defaults: Record<string, unknown> = {
-    "site.contact": { address: "Sharadabai Pawar College, Omerga", phone: "", email: "" },
-    "site.hero": { title: "Sharadabai Pawar College, Omerga", subtitle: "Learn. Grow. Lead.", imageUrl: "" },
+    "site.contact": { address: "Shri Chatrapati Shivaji College, Omerga", phone: "", email: "" },
+    "site.hero": { title: "Shri Chatrapati Shivaji College, Omerga", subtitle: "Learn. Grow. Lead.", imageUrl: "" },
   };
   for (const [key, value] of Object.entries(defaults)) {
     await prisma.siteContent.upsert({ where: { key }, update: {}, create: { key, value: value as object } });

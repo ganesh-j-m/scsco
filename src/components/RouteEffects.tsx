@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { adminNav } from "@/routes/adminNav";
 
-const SITE = "SCSCO - Sharadabai Pawar College";
+const SITE = "SCSCO - Shri Chatrapati Shivaji College";
 const titles: Record<string, string> = Object.fromEntries(adminNav.flatMap((g) => g.items.map((i) => [i.to, i.label])));
 const words = (s: string) => s.replace(/[-_]/g, " ").replace(/^./, (c) => c.toUpperCase());
 
