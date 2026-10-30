@@ -57,8 +57,6 @@ export default function Home() {
         </div>
       )}
 
-      <PlacedStudents />
-
       {about?.summary && (
         <Section>
           <div className="grid items-center gap-8 md:grid-cols-2">
@@ -145,6 +143,8 @@ export default function Home() {
           </div>
         </Section>
       ))}
+
+      <PlacedStudents />
     </>
   );
 }
