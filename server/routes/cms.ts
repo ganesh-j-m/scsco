@@ -110,6 +110,26 @@ content({
   toData: (d) => ({ title: d.title, description: d.description ?? null, imageUrl: d.imageUrl ?? null, date: d.date ? toDate(d.date) : null, status: d.status }),
 });
 
+content({
+  path: "/placed-students", entity: "PlacedStudent", roles: AP, delegate: prisma.placedStudent, search: ["name", "company"], orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+  schema: z.object({
+    name: z.string().trim().min(2, "Enter the student name").max(120),
+    photoUrl: optUrl,
+    company: z.string().trim().min(2, "Enter the company name").max(120),
+    companyLogo: optUrl,
+    role: z.string().trim().min(2).max(60).default("Full Time"),
+    course: optStr(80),
+    batch: optStr(20),
+    package: optStr(60),
+    sortOrder: z.coerce.number().int().min(0).max(9999).default(0),
+    status,
+  }),
+  toData: (d) => ({
+    name: d.name, photoUrl: d.photoUrl ?? null, company: d.company, companyLogo: d.companyLogo ?? null, role: d.role,
+    course: d.course ?? null, batch: d.batch ?? null, package: d.package ?? null, sortOrder: d.sortOrder, status: d.status,
+  }),
+});
+
 // Images used by these pages are uploaded through /api/uploads/image (staff only).
 
 // ═════════════ Site content blocks (homepage, about, principal, contact, admissions, campus) ═════════════
