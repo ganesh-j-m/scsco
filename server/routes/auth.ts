@@ -11,13 +11,26 @@ import { hashPassword, homeRouteFor, toSafeUser, verifyLogin } from "../services
 
 const router = Router();
 
+// Per account: 10 wrong passwords per 15 min for that Login ID (other students are not affected).
+// Successful logins are never counted, so a whole class can log in at the same moment.
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
-  skipSuccessfulRequests: true, // only failed attempts count toward the limit
+  skipSuccessfulRequests: true,
+  keyGenerator: (req) => `id:${String(req.body?.loginId ?? "").trim().toLowerCase().slice(0, 64) || "none"}`,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Too many login attempts. Try again in a few minutes." },
+  message: { error: "Too many wrong attempts for this Login ID. Try again in 15 minutes." },
+});
+// Per IP: a high ceiling for WRONG attempts only (a whole college shares one IP),
+// still stops one machine from trying thousands of different IDs.
+const ipLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 1000,
+  skipSuccessfulRequests: true,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many login attempts from this network. Try again in a few minutes." },
 });
 const passwordLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -29,6 +42,7 @@ const passwordLimiter = rateLimit({
 
 router.post(
   "/login",
+  ipLoginLimiter,
   loginLimiter,
   asyncHandler(async (req, res) => {
     const { loginId, password } = loginSchema.parse(req.body);
