@@ -12,8 +12,34 @@ import { assertInScope, departmentScope } from "../services/scope.js";
 const router = Router();
 router.use(authenticate, authorize("ADMIN", "PRINCIPAL", "HOD", "FACULTY"));
 
-// Faculty can only read their own slots; everyone else here can also change the timetable (HOD: own department).
-const writers = authorize("ADMIN", "PRINCIPAL", "HOD");
+// Admin / Principal / HOD (own department) can change any slot. A FACULTY member can add, change and delete
+// only the lectures of subjects assigned to them. Every change notifies the students of that class.
+const DAY_NAME: Record<string, string> = { MON: "Monday", TUE: "Tuesday", WED: "Wednesday", THU: "Thursday", FRI: "Friday", SAT: "Saturday", SUN: "Sunday" };
+
+/** Bell notification for every active student of the class. Never breaks the main request. */
+async function notifyClass(c: { courseId: string; year: number; division: string }, title: string, body: string) {
+  try {
+    const students = await prisma.student.findMany({
+      where: { courseId: c.courseId, year: c.year, division: { equals: c.division, mode: "insensitive" }, status: "ACTIVE", user: { status: "ACTIVE" } },
+      select: { userId: true },
+    });
+    if (!students.length) return;
+    await prisma.notification.createMany({ data: students.map((s) => ({ userId: s.userId, type: "ACADEMIC" as const, title, body, link: "/portal/dashboard" })) });
+  } catch (e) {
+    console.error("timetable notification failed", (e as Error).message);
+  }
+}
+
+const describe = (x: { day: string; startTime: string; endTime: string; room?: string | null }, subject: string) =>
+  `${subject} - ${DAY_NAME[x.day] ?? x.day} ${x.startTime}-${x.endTime}${x.room ? `, ${x.room}` : ""}`;
+
+/** For FACULTY: their own faculty id (null for other roles). */
+async function myFacultyId(req: { user?: { id: string; role: string } }) {
+  if (req.user?.role !== "FACULTY") return null;
+  const me = await prisma.faculty.findUnique({ where: { userId: req.user.id }, select: { id: true } });
+  if (!me) throw forbidden();
+  return me.id;
+}
 
 const include = {
   subject: { select: { id: true, name: true, code: true } },
@@ -110,25 +136,39 @@ router.get(
 
 router.post(
   "/",
-  writers,
   asyncHandler(async (req, res) => {
     const d = timetableSchema.parse(req.body);
+    const mine = await myFacultyId(req);
+    if (mine) {
+      d.facultyId = mine; // a teacher can only schedule themselves
+      const sub = await prisma.subject.findUnique({ where: { id: d.subjectId }, select: { facultyId: true } });
+      if (!sub || sub.facultyId !== mine) throw forbidden("You can add lectures only for subjects assigned to you.");
+    }
     await validateSlot(await departmentScope(req), d);
     const slot = await prisma.timetable.create({ data: d, include });
     await audit(req, "TIMETABLE_CREATED", "Timetable", slot.id, { day: slot.day, start: slot.startTime });
+    await notifyClass(slot, "New lecture scheduled", describe(slot, slot.subject.name) + ` (${slot.faculty.user.name})`);
     res.status(201).json({ slot: (await withCourseNames([slot]))[0] });
   }),
 );
 
 router.patch(
   "/:id",
-  writers,
   asyncHandler(async (req, res) => {
     const d = timetableUpdateSchema.parse(req.body);
     const scope = await departmentScope(req);
     const current = await prisma.timetable.findUnique({ where: { id: req.params.id } });
     if (!current) throw notFound("Timetable slot not found");
     assertInScope(scope, current.departmentId);
+    const mine = await myFacultyId(req);
+    if (mine) {
+      if (current.facultyId !== mine) throw forbidden("You can change only your own lectures.");
+      if (d.facultyId) d.facultyId = mine;
+      if (d.subjectId) {
+        const sub = await prisma.subject.findUnique({ where: { id: d.subjectId }, select: { facultyId: true } });
+        if (!sub || sub.facultyId !== mine) throw forbidden("You can use only subjects assigned to you.");
+      }
+    }
     const merged: Slot = {
       day: d.day ?? current.day, startTime: d.startTime ?? current.startTime, endTime: d.endTime ?? current.endTime,
       departmentId: d.departmentId ?? current.departmentId, courseId: d.courseId ?? current.courseId, year: d.year ?? current.year,
@@ -138,20 +178,25 @@ router.patch(
     await validateSlot(scope, merged, current.id);
     const slot = await prisma.timetable.update({ where: { id: current.id }, data: d, include });
     await audit(req, "TIMETABLE_UPDATED", "Timetable", slot.id, { fields: Object.keys(d) });
+    await notifyClass(slot, "Lecture changed", describe(slot, slot.subject.name) + ` (${slot.faculty.user.name})`);
+    // if the lecture moved to another class, the old class is told too
+    if (current.courseId !== slot.courseId || current.year !== slot.year || current.division !== slot.division)
+      await notifyClass(current, "Lecture cancelled", `${DAY_NAME[current.day] ?? current.day} ${current.startTime}-${current.endTime} lecture was moved to another class.`);
     res.json({ slot: (await withCourseNames([slot]))[0] });
   }),
 );
 
 router.delete(
   "/:id",
-  writers,
   asyncHandler(async (req, res) => {
-    const current = await prisma.timetable.findUnique({ where: { id: req.params.id } });
+    const current = await prisma.timetable.findUnique({ where: { id: req.params.id }, include });
     if (!current) throw notFound("Timetable slot not found");
     assertInScope(await departmentScope(req), current.departmentId);
-    if (req.user!.role === "FACULTY") throw forbidden();
+    const mine = await myFacultyId(req);
+    if (mine && current.facultyId !== mine) throw forbidden("You can delete only your own lectures.");
     await prisma.timetable.delete({ where: { id: current.id } });
     await audit(req, "TIMETABLE_DELETED", "Timetable", current.id);
+    await notifyClass(current, "Lecture cancelled", describe(current, current.subject.name) + " has been removed from the timetable.");
     res.json({ ok: true });
   }),
 );
