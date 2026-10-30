@@ -1,0 +1,59 @@
+// schema.prisma chya shevti paste kar (junya models la kahi badal nahi)
+
+enum MeetingAudience {
+  ALL         // sarv departments: sarv faculty + HODs
+  DEPARTMENT  // nivadlele department(s): tyanche faculty + HOD
+  HOD         // fakt HODs (sarv kinva nivadlelya departments che)
+}
+
+enum MeetingStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum MeetingClaim {
+  INVITED    // principal ne bolavle
+  REQUESTED  // faculty mhanto "mi attend keli"
+  APPROVED   // principal ne confirm kele
+  REJECTED   // principal ne nakarle
+}
+
+model Meeting {
+  id            String          @id @default(cuid())
+  title         String
+  topic         String?
+  date          DateTime        @db.Date
+  startTime     String
+  endTime       String?
+  venue         String
+  audience      MeetingAudience
+  departmentIds String[]
+  status        MeetingStatus   @default(SCHEDULED)
+  minutes       String?
+  createdById   String
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  participants MeetingParticipant[]
+
+  @@index([date])
+  @@index([createdById])
+}
+
+model MeetingParticipant {
+  id          String       @id @default(cuid())
+  meetingId   String
+  userId      String
+  status      MeetingClaim @default(INVITED)
+  note        String?
+  requestedAt DateTime?
+  decidedAt   DateTime?
+  decidedById String?
+  remarks     String?
+
+  meeting Meeting @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  @@unique([meetingId, userId])
+  @@index([userId, status])
+}

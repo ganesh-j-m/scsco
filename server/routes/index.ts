@@ -30,6 +30,7 @@ import formsRoutes from "./forms.js";
 import cmsRoutes from "./cms.js";
 import placedStudentsRoutes from "./placedStudents.js";
 import courseworkRoutes from "./coursework.js";
+import meetingsRoutes from "./meetings.js";
 
 const api = Router();
 
@@ -64,5 +65,6 @@ api.use("/notifications", notificationsRoutes);
 api.use("/forms", formsRoutes);
 api.use("/cms", cmsRoutes);
 api.use("/coursework", courseworkRoutes);
+api.use("/meetings", meetingsRoutes);
 
 export default api;

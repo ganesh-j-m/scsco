@@ -61,6 +61,7 @@ const PlacementsAdmin = lazy(() => import("@/pages/admin/Placements"));
 const Grievances = lazy(() => import("@/pages/admin/Grievances"));
 const Announcements = lazy(() => import("@/pages/admin/Announcements"));
 const PlacedStudents = lazy(() => import("@/pages/admin/PlacedStudents"));
+const Meetings = lazy(() => import("@/pages/admin/Meetings"));
 const PortalResults = lazy(() => import("@/pages/portal/Results"));
 const PortalFees = lazy(() => import("@/pages/portal/Fees"));
 const PortalCertificates = lazy(() => import("@/pages/portal/Certificates"));
@@ -125,6 +126,7 @@ const implemented: Record<string, React.LazyExoticComponent<() => JSX.Element>> 
   "/admin/grievances": Grievances,
   "/admin/notifications": Announcements,
   "/admin/placed-students": PlacedStudents,
+  "/admin/meetings": Meetings,
   "/admin/forms": FormsAdmin,
   "/admin/notices": CmsNotices,
   "/admin/events": CmsEvents,

@@ -58,6 +58,7 @@ export const adminNav: NavGroup[] = [
       { label: "Grievances", to: "/admin/grievances", icon: MessageSquareWarning, phase: "Phase 7", roles: AP },
       { label: "Notifications", to: "/admin/notifications", icon: Bell, phase: "Phase 7", roles: AP },
       { label: "Forms", to: "/admin/forms", icon: FormInput, phase: "Phase 8" },
+      { label: "Meetings", to: "/admin/meetings", icon: CalendarDays, phase: "Phase 12" },
     ],
   },
   {
