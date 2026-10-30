@@ -67,6 +67,7 @@ export const adminNav: NavGroup[] = [
       { label: "Placements", to: "/admin/placements", icon: Briefcase, phase: "Phase 7", roles: AP },
       { label: "Facilities", to: "/admin/facilities", icon: Landmark, phase: "Phase 9", roles: A },
       { label: "Achievements", to: "/admin/achievements", icon: Trophy, phase: "Phase 9", roles: A },
+      { label: "Placed Students", to: "/admin/placed-students", icon: GraduationCap, phase: "Phase 12", roles: AP },
     ],
   },
   {

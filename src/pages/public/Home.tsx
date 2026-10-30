@@ -4,6 +4,7 @@ import { useSite } from "@/hooks/useSite";
 import { useApi } from "@/hooks/useApi";
 import { CardGrid, CardSkeletons, DataState, formatDate, ImageCard, LazyImage, Reveal, Section } from "@/components/public";
 import type { Achievement, Department, EventItem, Facility, GalleryItem, List, Notice, Placement, Stats } from "@/types/public";
+import PlacedStudents from "@/components/PlacedStudents";
 
 export default function Home() {
   const { site } = useSite();
@@ -55,6 +56,8 @@ export default function Home() {
           </div>
         </div>
       )}
+
+      <PlacedStudents />
 
       {about?.summary && (
         <Section>

@@ -28,6 +28,7 @@ import grievancesRoutes from "./grievances.js";
 import notificationsRoutes from "./notifications.js";
 import formsRoutes from "./forms.js";
 import cmsRoutes from "./cms.js";
+import placedStudentsRoutes from "./placedStudents.js";
 import courseworkRoutes from "./coursework.js";
 
 const api = Router();
@@ -36,6 +37,7 @@ api.get("/health", (_req, res) => res.json({ ok: true }));
 api.use("/auth", authRoutes);
 api.use("/users", userRoutes);
 api.use("/audit-logs", auditRoutes);
+api.use("/public/placed-students", placedStudentsRoutes);
 api.use("/public", publicRoutes);
 api.use("/dashboard", dashboardRoutes);
 api.use("/lookups", lookupRoutes);
