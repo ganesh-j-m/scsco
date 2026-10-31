@@ -3,7 +3,7 @@ import { CalendarDays, Check, ChevronDown, ChevronUp, MapPin, Plus, X } from "lu
 import { useToast } from "@/context/ToastContext";
 import { useAuth } from "@/context/AuthContext";
 import { PageHeader, Spinner } from "@/components/ui";
-import { apiMessage, FormField } from "@/components/forms";
+import { FormField } from "@/components/forms";
 
 type Claim = "INVITED" | "REQUESTED" | "APPROVED" | "REJECTED";
 interface Meeting {
@@ -27,6 +27,8 @@ async function call<T>(path: string, method = "GET", body?: unknown): Promise<T>
   if (!r.ok) throw new Error((j as { error?: string }).error ?? "Request failed");
   return j as T;
 }
+
+const apiMessage = (e: unknown, fb: string) => (e instanceof Error && e.message ? e.message : fb);
 
 const emptyForm = { title: "", topic: "", date: "", startTime: "11:00", endTime: "", venue: "", audience: "ALL", departmentIds: [] as string[] };
 
