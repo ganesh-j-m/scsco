@@ -63,6 +63,8 @@ const Announcements = lazy(() => import("@/pages/admin/Announcements"));
 const PlacedStudents = lazy(() => import("@/pages/admin/PlacedStudents"));
 const StudentImport = lazy(() => import("@/pages/admin/StudentImport"));
 const Meetings = lazy(() => import("@/pages/admin/Meetings"));
+const EventRequestsAdmin = lazy(() => import("@/pages/admin/EventRequests"));
+const PortalEventRequests = lazy(() => import("@/pages/portal/EventRequests"));
 const PortalResults = lazy(() => import("@/pages/portal/Results"));
 const PortalFees = lazy(() => import("@/pages/portal/Fees"));
 const PortalCertificates = lazy(() => import("@/pages/portal/Certificates"));
@@ -128,6 +130,7 @@ const implemented: Record<string, React.LazyExoticComponent<() => JSX.Element>> 
   "/admin/notifications": Announcements,
   "/admin/placed-students": PlacedStudents,
   "/admin/meetings": Meetings,
+  "/admin/event-requests": EventRequestsAdmin,
   "/admin/student-import": StudentImport,
   "/admin/forms": FormsAdmin,
   "/admin/notices": CmsNotices,
@@ -201,6 +204,7 @@ export default function AppRoutes() {
             <Route path="library" element={<PortalLibrary />} />
             <Route path="grievances" element={<PortalGrievances />} />
             <Route path="notifications" element={<PortalNotifications />} />
+            <Route path="event-requests" element={<PortalEventRequests />} />
             <Route path="forms" element={<PortalForms />} />
             <Route path="forms/:id" element={<FormFill />} />
             {PORTAL_PATHS.filter((p) => !["attendance", "scan", "exams", "assignments", "study-material", "profile", "results", "fees", "certificates", "placements", "library", "grievances", "notifications", "forms"].includes(p)).map((p) => (

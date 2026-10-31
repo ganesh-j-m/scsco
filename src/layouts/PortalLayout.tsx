@@ -6,8 +6,9 @@ import { GraduationCap, LogOut } from "lucide-react";
 import { STAFF_ROLES } from "@/routes/guards";
 import { useAuth } from "@/context/AuthContext";
 import { NotificationBell } from "@/components/NotificationBell";
+import { PrincipalStatus } from "@/components/PrincipalStatus";
 
-const links = ["dashboard", "profile", "attendance", "scan", "assignments", "study-material", "exams", "results", "fees", "certificates", "placements", "library", "grievances", "forms", "notifications"];
+const links = ["dashboard", "profile", "attendance", "scan", "assignments", "study-material", "exams", "results", "fees", "certificates", "placements", "library", "grievances", "forms", "event-requests", "notifications"];
 
 export default function PortalLayout() {
   const { user, logout } = useAuth();
@@ -37,6 +38,7 @@ export default function PortalLayout() {
           ))}
         </nav>
       </header>
+      <PrincipalStatus />
       <main id="main-content" tabIndex={-1} className="mx-auto max-w-7xl p-4 outline-none md:p-6"><Suspense fallback={<LoadingState rows={4} />}><Outlet /></Suspense></main>
       <AssistantWidget />
     </div>

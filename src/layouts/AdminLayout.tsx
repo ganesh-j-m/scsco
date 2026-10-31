@@ -7,6 +7,7 @@ import { LoadingState } from "@/components/ui";
 import { useAuth } from "@/context/AuthContext";
 import { adminNav } from "@/routes/adminNav";
 import { NotificationBell } from "@/components/NotificationBell";
+import { PrincipalStatus } from "@/components/PrincipalStatus";
 
 export default function AdminLayout() {
   const { user, logout } = useAuth();
@@ -93,6 +94,7 @@ export default function AdminLayout() {
             </button>
           </div>
         </header>
+        <PrincipalStatus />
         <main id="main-content" tabIndex={-1} className="flex-1 p-4 outline-none md:p-6"><Suspense fallback={<LoadingState rows={4} />}><Outlet /></Suspense></main>
         <AssistantWidget />
       </div>

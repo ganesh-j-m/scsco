@@ -60,6 +60,7 @@ export const adminNav: NavGroup[] = [
       { label: "Notifications", to: "/admin/notifications", icon: Bell, phase: "Phase 7", roles: AP },
       { label: "Forms", to: "/admin/forms", icon: FormInput, phase: "Phase 8" },
       { label: "Meetings", to: "/admin/meetings", icon: CalendarDays, phase: "Phase 12" },
+      { label: "Event Requests", to: "/admin/event-requests", icon: ClipboardList, phase: "Phase 12", roles: AC },
     ],
   },
   {

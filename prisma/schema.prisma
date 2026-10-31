@@ -877,3 +877,58 @@ model MeetingParticipant {
   @@unique([meetingId, userId])
   @@index([userId, status])
 }
+
+// schema.prisma chya shevti paste kar (junya models la badal nahi)
+
+enum EventRequestStatus {
+  PENDING_HOD        // HOD chya approval chi vaat
+  PENDING_PRINCIPAL  // HOD ne approve kele, principal chi vaat
+  MEET_PRINCIPAL     // principal ne office madhe bolavle
+  CHANGES_REQUESTED  // HOD / principal ne date badla kinva badal sangitla
+  APPROVED           // principal ne final approval dile
+  REJECTED
+  CANCELLED          // student ne radd kele
+}
+
+model EventRequest {
+  id                   String             @id @default(cuid())
+  title                String
+  description          String
+  eventDate            DateTime           @db.Date
+  endDate              DateTime?          @db.Date
+  venue                String
+  expectedParticipants Int?
+  budget               String?
+  requesterId          String
+  requesterName        String
+  requesterClass       String
+  departmentId         String
+  courseId             String
+  status               EventRequestStatus @default(PENDING_HOD)
+  changesFrom          String?            // "HOD" kinva "PRINCIPAL": kon badal magto aahe
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+
+  actions EventRequestAction[]
+
+  @@index([requesterId])
+  @@index([departmentId, status])
+  @@index([status])
+}
+
+model EventRequestAction {
+  id           String   @id @default(cuid())
+  requestId    String
+  actorId      String
+  actorName    String
+  actorRole    String
+  action       String   // SUBMITTED, RESUBMITTED, HOD_APPROVED, HOD_REJECTED, HOD_CHANGES, PRINCIPAL_APPROVED, PRINCIPAL_REJECTED, PRINCIPAL_CHANGES, PRINCIPAL_MEET, CANCELLED
+  message      String?
+  proposedDate DateTime? @db.Date
+  createdAt    DateTime @default(now())
+
+  request EventRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId, createdAt])
+}
+

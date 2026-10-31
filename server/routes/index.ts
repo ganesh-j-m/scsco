@@ -32,6 +32,8 @@ import placedStudentsRoutes from "./placedStudents.js";
 import courseworkRoutes from "./coursework.js";
 import meetingsRoutes from "./meetings.js";
 import studentImportRoutes from "./studentImport.js";
+import eventRequestsRoutes from "./eventRequests.js";
+import principalStatusRoutes from "./principalStatus.js";
 
 const api = Router();
 
@@ -68,6 +70,7 @@ api.use("/cms", cmsRoutes);
 api.use("/coursework", courseworkRoutes);
 api.use("/meetings", meetingsRoutes);
 api.use("/student-import", studentImportRoutes);
-
+api.use("/event-requests", eventRequestsRoutes);
+api.use("/principal-status", principalStatusRoutes);
 
 export default api;
