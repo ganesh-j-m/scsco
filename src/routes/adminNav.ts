@@ -29,6 +29,7 @@ export const adminNav: NavGroup[] = [
     items: [
       { label: "Users", to: "/admin/users", icon: Users, phase: "Phase 1", roles: A },
       { label: "Students", to: "/admin/students", icon: GraduationCap, phase: "Phase 3", roles: AC },
+      { label: "Import Students", to: "/admin/student-import", icon: GraduationCap, phase: "Phase 12", roles: A },
       { label: "Faculty", to: "/admin/faculty", icon: UserCog, phase: "Phase 3", roles: AC },
       { label: "HODs", to: "/admin/hods", icon: ShieldCheck, phase: "Phase 3", roles: AP },
       { label: "Parents", to: "/admin/parents", icon: Heart, phase: "Phase 3", roles: AP },
