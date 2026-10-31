@@ -94,6 +94,21 @@ async function withCourseNames<T extends { courseId: string }>(rows: T[]) {
   return rows.map((r) => ({ ...r, course: byId.get(r.courseId) ?? null }));
 }
 
+// FACULTY: the subjects assigned to me (used by the "Add lecture" form). Other roles get an empty list.
+router.get(
+  "/my-subjects",
+  asyncHandler(async (req, res) => {
+    const mine = await myFacultyId(req);
+    if (!mine) return res.json({ data: [] });
+    const data = await prisma.subject.findMany({
+      where: { facultyId: mine },
+      select: { id: true, name: true, code: true, semester: true, courseId: true, course: { select: { name: true, departmentId: true } } },
+      orderBy: { name: "asc" },
+    });
+    res.json({ data });
+  }),
+);
+
 router.get(
   "/",
   asyncHandler(async (req, res) => {
@@ -137,8 +152,9 @@ router.get(
 router.post(
   "/",
   asyncHandler(async (req, res) => {
-    const d = timetableSchema.parse(req.body);
     const mine = await myFacultyId(req);
+    if (mine) req.body = { ...req.body, facultyId: mine }; // a teacher always schedules themselves
+    const d = timetableSchema.parse(req.body);
     if (mine) {
       d.facultyId = mine; // a teacher can only schedule themselves
       const sub = await prisma.subject.findUnique({ where: { id: d.subjectId }, select: { facultyId: true } });
