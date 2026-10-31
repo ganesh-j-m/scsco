@@ -4,7 +4,7 @@ import { prisma } from "../utils/prisma.js";
 import { forbidden } from "../utils/errors.js";
 import { departmentScope } from "./scope.js";
 
-export const QR_VALIDITY_MS = 5 * 60 * 1000;
+export const QR_VALIDITY_MS = 10 * 60 * 1000;
 // Scans in flight when a session ends must not collide with the auto-absent step.
 const FINALIZE_GRACE_MS = 30_000;
 

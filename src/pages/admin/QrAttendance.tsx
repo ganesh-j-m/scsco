@@ -42,7 +42,7 @@ export default function QrAttendance() {
     try {
       const r = await api<{ session: { id: string } }>("/qr-attendance/sessions", { body });
       setActiveId(r.session.id);
-      toast.success("QR code generated. It is valid for 5 minutes.");
+      toast.success("QR code generated. It is valid for 10 minutes.");
       void history.reload();
     } catch (e) { toast.error(apiMessage(e, "Unable to generate the QR code")); }
     finally { setCreating(false); }
@@ -64,8 +64,7 @@ export default function QrAttendance() {
 
   return (
     <>
-      <PageHeader title="QR attendance" subtitle="Each QR is valid for exactly 5 minutes. Students scan it while logged in." />
-      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
+      <PageHeader title="QR attendance" subtitle="Each QR is valid for exactly 10 minutes. Students scan it while logged in." />      <div className="grid gap-6 lg:grid-cols-[320px_1fr]">
         <div className="card h-fit p-4">
           <h2 className="mb-3 font-medium">New session</h2>
           {options.loading ? <LoadingState rows={3} /> : options.error ? <ErrorState message={options.error} onRetry={options.reload} /> : !options.data?.subjects.length ? (
