@@ -35,6 +35,14 @@ const schema = z.object({
 type Status = "NEW" | "EXISTS" | "ERROR";
 interface Result { row: number; loginId: string; name: string; email: string; phone: string; status: Status; message?: string }
 
+router.get(
+  "/courses",
+  asyncHandler(async (_req, res) => {
+    const data = await prisma.course.findMany({ where: { status: "ACTIVE" }, select: { id: true, name: true, code: true }, orderBy: { name: "asc" } });
+    res.json({ data });
+  }),
+);
+
 router.post(
   "/",
   asyncHandler(async (req, res) => {

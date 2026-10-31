@@ -1,7 +1,6 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FileSpreadsheet, Upload } from "lucide-react";
 import { readSheet } from "read-excel-file/browser";
-import { useLookup } from "@/hooks/useLookup";
 import { useToast } from "@/context/ToastContext";
 import { PageHeader, Spinner } from "@/components/ui";
 import { FormField } from "@/components/forms";
@@ -22,7 +21,13 @@ const cell = (v: unknown) => (v === null || v === undefined ? "" : String(v).tri
 export default function StudentImport() {
   const toast = useToast();
   const toastRef = useRef(toast); toastRef.current = toast;
-  const courses = useLookup("courses");
+  const [courses, setCourses] = useState<{ id: string; name: string; code: string }[]>([]);
+  useEffect(() => {
+    fetch("/api/student-import/courses", { credentials: "include" })
+      .then((r) => r.json())
+      .then((j: { data?: { id: string; name: string; code: string }[] }) => setCourses(j.data ?? []))
+      .catch(() => undefined);
+  }, []);
   const yr = new Date().getFullYear();
   const [f, setF] = useState({ courseId: "", year: 1, semester: 1, division: "A", admissionYear: yr, prefix: "BCS", password: "12345" });
   const [rows, setRows] = useState<Row[] | null>(null);
@@ -79,7 +84,7 @@ export default function StudentImport() {
         {error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
 
         <div className="grid gap-3 sm:grid-cols-3">
-          <FormField label="Course" id="si-course"><select id="si-course" className="input" value={f.courseId} onChange={(e) => setField("courseId", e.target.value)}><option value="">Select course</option>{courses.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}</select></FormField>
+          <FormField label="Course" id="si-course"><select id="si-course" className="input" value={f.courseId} onChange={(e) => setField("courseId", e.target.value)}><option value="">Select course</option>{courses.map((c) => <option key={c.id} value={c.id}>{c.name} ({c.code})</option>)}</select></FormField>
           <FormField label="Year" id="si-year"><select id="si-year" className="input" value={f.year} onChange={(e) => { const y = Number(e.target.value); setF((p) => ({ ...p, year: y, semester: y * 2 - 1, admissionYear: yr - (y - 1) })); setOut(null); }}><option value={1}>1</option><option value={2}>2</option><option value={3}>3</option></select></FormField>
           <FormField label="Semester" id="si-sem"><input id="si-sem" type="number" min={1} max={10} className="input" value={f.semester} onChange={(e) => setField("semester", Number(e.target.value))} /></FormField>
           <FormField label="Division" id="si-div"><input id="si-div" className="input" maxLength={5} value={f.division} onChange={(e) => setField("division", e.target.value)} /></FormField>
