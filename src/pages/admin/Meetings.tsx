@@ -20,7 +20,7 @@ const CLAIM_CLR: Record<Claim, string> = { INVITED: "bg-slate-100 text-slate-600
 const day = (iso: string) => new Date(iso).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", timeZone: "UTC" });
 
 async function call<T>(path: string, method = "GET", body?: unknown): Promise<T> {
-  const r = await fetch(`/api/meetings${path}`, {
+  const r = await fetch(`/api/meetings${path === "/" ? "" : path}`, {
     method, credentials: "include", headers: body ? { "Content-Type": "application/json" } : undefined, body: body ? JSON.stringify(body) : undefined,
   });
   const j = await r.json().catch(() => ({}));

@@ -22,9 +22,13 @@ export const fmtDate = (iso: string | null) => (iso ? new Date(iso).toLocaleDate
 export const dateInput = (iso: string | null) => (iso ? iso.slice(0, 10) : "");
 
 export async function call<T>(path: string, method = "GET", body?: unknown): Promise<T> {
-  const r = await fetch(`/api/event-requests${path}`, { method, credentials: "include", headers: body ? { "Content-Type": "application/json" } : undefined, body: body ? JSON.stringify(body) : undefined });
+  const r = await fetch(`/api/event-requests${path === "/" ? "" : path}`, { method, credentials: "include", headers: body ? { "Content-Type": "application/json" } : undefined, body: body ? JSON.stringify(body) : undefined });
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error((j as { error?: string }).error ?? "Request failed");
+  if (!r.ok) {
+    const msg = (j as { error?: string }).error;
+    if (msg) throw new Error(msg);
+    throw new Error(r.status === 502 || r.status === 503 || r.status === 504 ? "The server is waking up. Please try again in a minute." : `Request failed (error ${r.status})`);
+  }
   return j as T;
 }
 export const errText = (e: unknown, fb: string) => (e instanceof Error && e.message ? e.message : fb);
